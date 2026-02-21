@@ -18,9 +18,24 @@
   --text2: #888;
   --accent: #FF4F00;
   --accent-dim: #cc3f00;
+  --accent-bg: rgba(255, 79, 0, 0.08);
   --warn: #ffaa00;
   --danger: #ff4444;
   --success: #44cc66;
+  --scene-bg: #0a0a0a;
+  --cube-color: #cccccc;
+}
+
+body.light {
+  --bg: #f2f2f2;
+  --surface: #ffffff;
+  --surface2: #e8e8e8;
+  --border: #d0d0d0;
+  --text: #1a1a1a;
+  --text2: #777;
+  --accent-bg: rgba(255, 79, 0, 0.1);
+  --scene-bg: #e0e0e0;
+  --cube-color: #999999;
 }
 
 body {
@@ -50,15 +65,74 @@ body {
 #panel::-webkit-scrollbar-track { background: transparent; }
 #panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+/* Title + Theme */
+.title-wrap { position: relative; }
+
 h1 {
   font-family: 'Space Mono', monospace;
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 2px;
   color: var(--accent);
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+h1:hover { opacity: 0.8; }
+h1 span { color: var(--text2); font-weight: 400; }
+
+#themePopover {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  z-index: 100;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+#themePopover.open { display: flex; }
+
+.popover-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text2);
 }
 
-h1 span { color: var(--text2); font-weight: 400; }
+.swatches { display: flex; gap: 8px; }
+
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.swatch:hover { transform: scale(1.15); }
+.swatch.active { border-color: var(--text); }
+
+.mode-toggle {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
+}
+.mode-toggle:hover { background: var(--border); }
 
 .section-label {
   font-family: 'Space Mono', monospace;
@@ -82,13 +156,14 @@ h1 span { color: var(--text2); font-weight: 400; }
   font-family: 'Space Mono', monospace;
   font-size: 11px;
   color: var(--text2);
-  width: 18px;
+  width: 14px;
   text-align: right;
   flex-shrink: 0;
 }
 
 .url-row input {
   flex: 1;
+  min-width: 0;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -102,6 +177,19 @@ h1 span { color: var(--text2); font-weight: 400; }
 
 .url-row input:focus { border-color: var(--accent); }
 .url-row input::placeholder { color: #444; }
+body.light .url-row input::placeholder { color: #aaa; }
+
+.face-tags {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--text2);
+  white-space: nowrap;
+  min-width: 40px;
+  text-align: right;
+  transition: color 0.15s;
+}
+
+.face-tags.lit { color: var(--accent); }
 
 /* Sliders */
 .slider-group { display: flex; flex-direction: column; gap: 14px; }
@@ -147,6 +235,35 @@ input[type="range"]::-webkit-slider-thumb {
   cursor: pointer;
 }
 
+/* Edge mode buttons */
+.edge-mode-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.edge-btn {
+  flex: 1;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  padding: 5px 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.edge-btn:hover { background: var(--border); }
+.edge-btn.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* Warnings */
 #warnings {
   display: flex;
@@ -170,24 +287,44 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--danger);
 }
 
-/* Export button */
-#exportBtn {
+/* Buttons */
+.btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+#exportBtn, #flipBtn {
   font-family: 'Space Mono', monospace;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
-  padding: 12px;
-  background: var(--accent);
-  color: #fff;
+  padding: 10px 12px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, opacity 0.15s;
   text-transform: uppercase;
 }
 
-#exportBtn:hover { background: var(--accent-dim); }
+#exportBtn {
+  flex: 1;
+  background: var(--accent);
+  color: #fff;
+}
+#exportBtn:hover { opacity: 0.85; }
 #exportBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+#flipBtn {
+  background: var(--surface2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+#flipBtn:hover { background: var(--border); }
+#flipBtn.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: var(--accent);
+}
 
 /* Status */
 #status {
@@ -195,19 +332,6 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 10px;
   color: var(--text2);
   text-align: center;
-}
-
-/* Distribution info */
-#distInfo {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  color: var(--text2);
-  line-height: 1.6;
-  padding: 8px 10px;
-  background: var(--bg);
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  display: none;
 }
 
 /* Viewport */
@@ -237,14 +361,20 @@ input[type="range"]::-webkit-slider-thumb {
 <body>
 
 <div id="panel">
-  <h1>QR CUBE <span>// 3D print</span></h1>
+  <div class="title-wrap">
+    <h1 id="titleBtn">QR CUBE <span>// 3D print</span></h1>
+    <div id="themePopover">
+      <div class="popover-label">Accent</div>
+      <div class="swatches" id="swatches"></div>
+      <div class="popover-label">Mode</div>
+      <button class="mode-toggle" id="modeToggle">Switch to Light</button>
+    </div>
+  </div>
 
   <div>
     <div class="section-label">URLs (up to 6)</div>
     <div class="url-group" id="urlGroup"></div>
   </div>
-
-  <div id="distInfo"></div>
 
   <div>
     <div class="section-label">Parameters</div>
@@ -254,7 +384,7 @@ input[type="range"]::-webkit-slider-thumb {
           <span class="slider-label">Cube Size</span>
           <span class="slider-value" id="sizeVal">50 mm</span>
         </div>
-        <input type="range" id="sizeSlider" min="20" max="100" value="50" step="1">
+        <input type="range" id="sizeSlider" min="30" max="120" value="50" step="1">
       </div>
       <div class="slider-row">
         <div class="slider-header">
@@ -263,12 +393,27 @@ input[type="range"]::-webkit-slider-thumb {
         </div>
         <input type="range" id="depthSlider" min="0.5" max="3" value="1.5" step="0.1">
       </div>
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-label">Edge Treatment</span>
+          <span class="slider-value" id="edgeVal">None</span>
+        </div>
+        <div class="edge-mode-row">
+          <button class="edge-btn active" data-mode="none">None</button>
+          <button class="edge-btn" data-mode="chamfer">Chamfer</button>
+          <button class="edge-btn" data-mode="fillet">Fillet</button>
+        </div>
+        <input type="range" id="edgeSlider" min="0" max="5" value="2" step="0.1" disabled>
+      </div>
     </div>
   </div>
 
   <div id="warnings"></div>
 
-  <button id="exportBtn">Export STL</button>
+  <div class="btn-row">
+    <button id="flipBtn" title="Reverse all mesh normals">Flip Normals</button>
+    <button id="exportBtn">Export STL</button>
+  </div>
 
   <div id="status">Ready</div>
 </div>
@@ -292,17 +437,45 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
+// ─── Theme Config ───
+const ACCENT_COLORS = [
+  { name: 'orange', hex: '#FF4F00', dim: '#cc3f00', three: 0xFF4F00 },
+  { name: 'blue',   hex: '#0088FF', dim: '#0066cc', three: 0x0088FF },
+  { name: 'green',  hex: '#00CC66', dim: '#00aa55', three: 0x00CC66 },
+  { name: 'purple', hex: '#8844FF', dim: '#6633cc', three: 0x8844FF },
+  { name: 'red',    hex: '#FF2244', dim: '#cc1133', three: 0xFF2244 },
+  { name: 'cyan',   hex: '#00DDCC', dim: '#00bbaa', three: 0x00DDCC },
+];
+
 // ─── State ───
 let cubeSize = 50;
 let engraveDepth = 1.5;
 let urls = ['', '', '', '', '', ''];
-let cubeMesh = null;
+let faceMeshes = []; // array of THREE.Mesh, one per cube face
+let edgeMode = 'none'; // 'none', 'chamfer', 'fillet'
+let edgeSize = 2;
+let normalsFlipped = false;
+let focusedInputIndex = -1;
+let currentAccent = ACCENT_COLORS[0];
+let isDarkMode = true;
 let rebuildTimeout = null;
+
+// Load saved theme
+try {
+  const saved = JSON.parse(localStorage.getItem('qrcube-theme'));
+  if (saved) {
+    if (saved.accent) currentAccent = ACCENT_COLORS.find(a => a.name === saved.accent) || ACCENT_COLORS[0];
+    if (saved.dark !== undefined) isDarkMode = saved.dark;
+  }
+} catch {}
+
+function saveTheme() {
+  localStorage.setItem('qrcube-theme', JSON.stringify({ accent: currentAccent.name, dark: isDarkMode }));
+}
 
 // ─── Three.js Setup ───
 const viewport = document.getElementById('viewport');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0a0a);
 
 const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
 camera.position.set(80, 60, 80);
@@ -328,10 +501,14 @@ scene.add(fillLight);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-// Grid helper
+// Grid
 const gridHelper = new THREE.GridHelper(120, 24, 0x222222, 0x1a1a1a);
 gridHelper.position.y = -40;
 scene.add(gridHelper);
+
+// Cube group
+const cubeGroup = new THREE.Group();
+scene.add(cubeGroup);
 
 function resize() {
   const w = viewport.clientWidth;
@@ -349,6 +526,30 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+
+// ─── Materials ───
+let defaultMaterial = new THREE.MeshStandardMaterial({
+  color: 0xcccccc,
+  roughness: 0.6,
+  metalness: 0.1,
+});
+
+let highlightMaterial = new THREE.MeshStandardMaterial({
+  color: currentAccent.three,
+  emissive: currentAccent.three,
+  emissiveIntensity: 0.35,
+  roughness: 0.4,
+  metalness: 0.1,
+});
+
+function updateMaterials() {
+  const cubeColor = isDarkMode ? 0xcccccc : 0x999999;
+  defaultMaterial.color.setHex(cubeColor);
+  defaultMaterial.needsUpdate = true;
+  highlightMaterial.color.setHex(currentAccent.three);
+  highlightMaterial.emissive.setHex(currentAccent.three);
+  highlightMaterial.needsUpdate = true;
+}
 
 // ─── QR Generation ───
 function getQRModules(url) {
@@ -379,63 +580,58 @@ function distributeURLs() {
     if (urls[i] && urls[i].trim()) active.push(urls[i].trim());
   }
 
-  // 6 faces: front, back, right, left, top, bottom
   const faces = [null, null, null, null, null, null];
-
   if (active.length === 0) return faces;
-  if (active.length === 1) {
-    return [active[0], active[0], active[0], active[0], active[0], active[0]];
-  }
-  if (active.length === 2) {
-    return [active[0], active[0], active[0], active[1], active[1], active[1]];
-  }
-  if (active.length === 3) {
-    return [active[0], active[0], active[1], active[1], active[2], active[2]];
-  }
-  // 4-6: one per face, remainder null
-  for (let i = 0; i < active.length && i < 6; i++) {
-    faces[i] = active[i];
+  if (active.length === 1) return [active[0], active[0], active[0], active[0], active[0], active[0]];
+  if (active.length === 2) return [active[0], active[0], active[0], active[1], active[1], active[1]];
+  if (active.length === 3) return [active[0], active[0], active[1], active[1], active[2], active[2]];
+  for (let i = 0; i < active.length && i < 6; i++) faces[i] = active[i];
+  return faces;
+}
+
+function getFacesForInput(inputIndex) {
+  const url = urls[inputIndex]?.trim();
+  if (!url) return [];
+  const dist = distributeURLs();
+  const faces = [];
+  for (let f = 0; f < 6; f++) {
+    if (dist[f] === url) faces.push(f);
   }
   return faces;
 }
 
 // ─── Face Orientation Table ───
-// Each face: { normal, uAxis, vAxis } in world space
-// QR is laid out in U (col) and V (row, top-to-bottom) on each face
 const FACE_TABLE = [
-  { name: 'front',  normal: [0, 0, 1],  uAxis: [1, 0, 0],  vAxis: [0, 1, 0]  },
-  { name: 'back',   normal: [0, 0, -1], uAxis: [-1, 0, 0], vAxis: [0, 1, 0]  },
-  { name: 'right',  normal: [1, 0, 0],  uAxis: [0, 0, -1], vAxis: [0, 1, 0]  },
-  { name: 'left',   normal: [-1, 0, 0], uAxis: [0, 0, 1],  vAxis: [0, 1, 0]  },
-  { name: 'top',    normal: [0, 1, 0],  uAxis: [1, 0, 0],  vAxis: [0, 0, -1] },
-  { name: 'bottom', normal: [0, -1, 0], uAxis: [1, 0, 0],  vAxis: [0, 0, 1]  },
+  { name: 'Front',  normal: [0, 0, 1],  uAxis: [1, 0, 0],  vAxis: [0, 1, 0]  },
+  { name: 'Back',   normal: [0, 0, -1], uAxis: [-1, 0, 0], vAxis: [0, 1, 0]  },
+  { name: 'Right',  normal: [1, 0, 0],  uAxis: [0, 0, -1], vAxis: [0, 1, 0]  },
+  { name: 'Left',   normal: [-1, 0, 0], uAxis: [0, 0, 1],  vAxis: [0, 1, 0]  },
+  { name: 'Top',    normal: [0, 1, 0],  uAxis: [1, 0, 0],  vAxis: [0, 0, -1] },
+  { name: 'Bottom', normal: [0, -1, 0], uAxis: [1, 0, 0],  vAxis: [0, 0, 1]  },
 ];
 
 // ─── Geometry Engine ───
-function buildFaceGeometry(faceIndex, qrData, size, depth) {
+function buildFaceGeometry(faceIndex, qrData, size, depth, inset) {
   const face = FACE_TABLE[faceIndex];
   const n = new THREE.Vector3(...face.normal);
   const u = new THREE.Vector3(...face.uAxis);
   const v = new THREE.Vector3(...face.vAxis);
   const half = size / 2;
-
-  // Face center on cube surface
   const center = n.clone().multiplyScalar(half);
+  const innerHalf = half - (inset || 0);
+  const innerSize = innerHalf * 2;
 
   if (!qrData || qrData.error) {
-    // Blank face — single flat quad
-    return buildBlankFace(center, u, v, n, size);
+    return buildBlankFace(center, u, v, n, innerSize);
   }
 
   const { grid, count } = qrData;
   const quietZone = 4;
   const totalModules = count + quietZone * 2;
-  const pitch = size / totalModules;
 
   const positions = [];
   const normals = [];
 
-  // Helper to get height of a cell (1 = dark/recessed, 0 = light/flush)
   function cellDark(row, col) {
     const qr = row - quietZone;
     const qc = col - quietZone;
@@ -447,37 +643,27 @@ function buildFaceGeometry(faceIndex, qrData, size, depth) {
     return cellDark(row, col) ? -depth : 0;
   }
 
-  // For each cell, emit a quad at the appropriate depth
   for (let row = 0; row < totalModules; row++) {
     for (let col = 0; col < totalModules; col++) {
       const d = cellDepth(row, col);
+      const u0 = (col / totalModules - 0.5) * innerSize;
+      const u1 = ((col + 1) / totalModules - 0.5) * innerSize;
+      const v0 = (0.5 - row / totalModules) * innerSize;
+      const v1 = (0.5 - (row + 1) / totalModules) * innerSize;
 
-      // Cell corners in UV space (origin at bottom-left of face)
-      const u0 = (col / totalModules - 0.5) * size;
-      const u1 = ((col + 1) / totalModules - 0.5) * size;
-      // V axis: row 0 is top of QR, so flip
-      const v0 = (0.5 - row / totalModules) * size;
-      const v1 = (0.5 - (row + 1) / totalModules) * size;
-
-      // 3D positions of quad corners
       const p00 = center.clone().add(u.clone().multiplyScalar(u0)).add(v.clone().multiplyScalar(v0)).add(n.clone().multiplyScalar(d));
       const p10 = center.clone().add(u.clone().multiplyScalar(u1)).add(v.clone().multiplyScalar(v0)).add(n.clone().multiplyScalar(d));
       const p11 = center.clone().add(u.clone().multiplyScalar(u1)).add(v.clone().multiplyScalar(v1)).add(n.clone().multiplyScalar(d));
       const p01 = center.clone().add(u.clone().multiplyScalar(u0)).add(v.clone().multiplyScalar(v1)).add(n.clone().multiplyScalar(d));
 
-      // Two triangles (CCW when viewed from outside = along normal)
-      pushTri(positions, normals, p00, p10, p11, n);
-      pushTri(positions, normals, p00, p11, p01, n);
+      pushQuad(positions, normals, p00, p10, p11, p01, n);
 
-      // Vertical walls where height transitions occur
-      // Right neighbor
       if (col < totalModules - 1) {
         const dRight = cellDepth(row, col + 1);
         if (d !== dRight) {
           buildWall(positions, normals, center, u, v, n, u1, v0, v1, d, dRight, 'right');
         }
       }
-      // Bottom neighbor
       if (row < totalModules - 1) {
         const dBelow = cellDepth(row + 1, col);
         if (d !== dBelow) {
@@ -487,69 +673,57 @@ function buildFaceGeometry(faceIndex, qrData, size, depth) {
     }
   }
 
-  // Edge walls — connect face surface to cube edge
-  // Top edge (row=0)
+  // Edge walls
   for (let col = 0; col < totalModules; col++) {
     const d = cellDepth(0, col);
     if (d !== 0) {
-      const uL = (col / totalModules - 0.5) * size;
-      const uR = ((col + 1) / totalModules - 0.5) * size;
-      const vTop = 0.5 * size;
+      const uL = (col / totalModules - 0.5) * innerSize;
+      const uR = ((col + 1) / totalModules - 0.5) * innerSize;
+      const vTop = 0.5 * innerSize;
       const pA = center.clone().add(u.clone().multiplyScalar(uL)).add(v.clone().multiplyScalar(vTop)).add(n.clone().multiplyScalar(0));
       const pB = center.clone().add(u.clone().multiplyScalar(uR)).add(v.clone().multiplyScalar(vTop)).add(n.clone().multiplyScalar(0));
       const pC = center.clone().add(u.clone().multiplyScalar(uR)).add(v.clone().multiplyScalar(vTop)).add(n.clone().multiplyScalar(d));
       const pD = center.clone().add(u.clone().multiplyScalar(uL)).add(v.clone().multiplyScalar(vTop)).add(n.clone().multiplyScalar(d));
-      const wallN = v.clone();
-      pushTri(positions, normals, pA, pB, pC, wallN);
-      pushTri(positions, normals, pA, pC, pD, wallN);
+      pushQuad(positions, normals, pA, pB, pC, pD, v.clone().negate());
     }
   }
-  // Bottom edge (row=totalModules-1)
   for (let col = 0; col < totalModules; col++) {
     const d = cellDepth(totalModules - 1, col);
     if (d !== 0) {
-      const uL = (col / totalModules - 0.5) * size;
-      const uR = ((col + 1) / totalModules - 0.5) * size;
-      const vBot = -0.5 * size;
+      const uL = (col / totalModules - 0.5) * innerSize;
+      const uR = ((col + 1) / totalModules - 0.5) * innerSize;
+      const vBot = -0.5 * innerSize;
       const pA = center.clone().add(u.clone().multiplyScalar(uR)).add(v.clone().multiplyScalar(vBot)).add(n.clone().multiplyScalar(0));
       const pB = center.clone().add(u.clone().multiplyScalar(uL)).add(v.clone().multiplyScalar(vBot)).add(n.clone().multiplyScalar(0));
       const pC = center.clone().add(u.clone().multiplyScalar(uL)).add(v.clone().multiplyScalar(vBot)).add(n.clone().multiplyScalar(d));
       const pD = center.clone().add(u.clone().multiplyScalar(uR)).add(v.clone().multiplyScalar(vBot)).add(n.clone().multiplyScalar(d));
-      const wallN = v.clone().negate();
-      pushTri(positions, normals, pA, pB, pC, wallN);
-      pushTri(positions, normals, pA, pC, pD, wallN);
+      pushQuad(positions, normals, pA, pB, pC, pD, v.clone());
     }
   }
-  // Left edge (col=0)
   for (let row = 0; row < totalModules; row++) {
     const d = cellDepth(row, 0);
     if (d !== 0) {
-      const uL = -0.5 * size;
-      const vT = (0.5 - row / totalModules) * size;
-      const vB = (0.5 - (row + 1) / totalModules) * size;
+      const uL = -0.5 * innerSize;
+      const vT = (0.5 - row / totalModules) * innerSize;
+      const vB = (0.5 - (row + 1) / totalModules) * innerSize;
       const pA = center.clone().add(u.clone().multiplyScalar(uL)).add(v.clone().multiplyScalar(vB)).add(n.clone().multiplyScalar(0));
       const pB = center.clone().add(u.clone().multiplyScalar(uL)).add(v.clone().multiplyScalar(vT)).add(n.clone().multiplyScalar(0));
       const pC = center.clone().add(u.clone().multiplyScalar(uL)).add(v.clone().multiplyScalar(vT)).add(n.clone().multiplyScalar(d));
       const pD = center.clone().add(u.clone().multiplyScalar(uL)).add(v.clone().multiplyScalar(vB)).add(n.clone().multiplyScalar(d));
-      const wallN = u.clone().negate();
-      pushTri(positions, normals, pA, pB, pC, wallN);
-      pushTri(positions, normals, pA, pC, pD, wallN);
+      pushQuad(positions, normals, pA, pB, pC, pD, u.clone());
     }
   }
-  // Right edge (col=totalModules-1)
   for (let row = 0; row < totalModules; row++) {
     const d = cellDepth(row, totalModules - 1);
     if (d !== 0) {
-      const uR = 0.5 * size;
-      const vT = (0.5 - row / totalModules) * size;
-      const vB = (0.5 - (row + 1) / totalModules) * size;
+      const uR = 0.5 * innerSize;
+      const vT = (0.5 - row / totalModules) * innerSize;
+      const vB = (0.5 - (row + 1) / totalModules) * innerSize;
       const pA = center.clone().add(u.clone().multiplyScalar(uR)).add(v.clone().multiplyScalar(vT)).add(n.clone().multiplyScalar(0));
       const pB = center.clone().add(u.clone().multiplyScalar(uR)).add(v.clone().multiplyScalar(vB)).add(n.clone().multiplyScalar(0));
       const pC = center.clone().add(u.clone().multiplyScalar(uR)).add(v.clone().multiplyScalar(vB)).add(n.clone().multiplyScalar(d));
       const pD = center.clone().add(u.clone().multiplyScalar(uR)).add(v.clone().multiplyScalar(vT)).add(n.clone().multiplyScalar(d));
-      const wallN = u.clone();
-      pushTri(positions, normals, pA, pB, pC, wallN);
-      pushTri(positions, normals, pA, pC, pD, wallN);
+      pushQuad(positions, normals, pA, pB, pC, pD, u.clone().negate());
     }
   }
 
@@ -568,8 +742,7 @@ function buildBlankFace(center, u, v, n, size) {
 
   const positions = [];
   const normals = [];
-  pushTri(positions, normals, p01, p11, p10, n);
-  pushTri(positions, normals, p01, p10, p00, n);
+  pushQuad(positions, normals, p00, p10, p11, p01, n);
 
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -582,61 +755,180 @@ function pushTri(positions, normals, a, b, c, normal) {
   normals.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
 }
 
+function pushQuad(positions, normals, a, b, c, d, normal) {
+  const ab = new THREE.Vector3().subVectors(b, a);
+  const ac = new THREE.Vector3().subVectors(c, a);
+  const cross = new THREE.Vector3().crossVectors(ab, ac);
+  if (cross.dot(normal) >= 0) {
+    pushTri(positions, normals, a, b, c, normal);
+    pushTri(positions, normals, a, c, d, normal);
+  } else {
+    pushTri(positions, normals, a, d, c, normal);
+    pushTri(positions, normals, a, c, b, normal);
+  }
+}
+
 function buildWall(positions, normals, center, u, v, n, param1, param2, param3, dA, dB, direction) {
   if (direction === 'right') {
-    // Wall along the right edge of a cell at u=param1, from v=param2 (top) to v=param3 (bottom)
-    const uPos = param1;
-    const vTop = param2;
-    const vBot = param3;
-
+    const uPos = param1, vTop = param2, vBot = param3;
     const pATop = center.clone().add(u.clone().multiplyScalar(uPos)).add(v.clone().multiplyScalar(vTop)).add(n.clone().multiplyScalar(dA));
     const pABot = center.clone().add(u.clone().multiplyScalar(uPos)).add(v.clone().multiplyScalar(vBot)).add(n.clone().multiplyScalar(dA));
     const pBTop = center.clone().add(u.clone().multiplyScalar(uPos)).add(v.clone().multiplyScalar(vTop)).add(n.clone().multiplyScalar(dB));
     const pBBot = center.clone().add(u.clone().multiplyScalar(uPos)).add(v.clone().multiplyScalar(vBot)).add(n.clone().multiplyScalar(dB));
-
-    // Wall normal: perpendicular to the wall, pointing toward the higher side
-    // If dA > dB (left is higher), normal points in +u direction
-    // If dA < dB (right is higher), normal points in -u direction
     const wallNormal = dA > dB ? u.clone() : u.clone().negate();
-
-    if (dA > dB) {
-      // Left side is higher (flush), right is recessed
-      pushTri(positions, normals, pATop, pABot, pBBot, wallNormal);
-      pushTri(positions, normals, pATop, pBBot, pBTop, wallNormal);
-    } else {
-      // Right side is higher
-      pushTri(positions, normals, pBTop, pBBot, pABot, wallNormal);
-      pushTri(positions, normals, pBTop, pABot, pATop, wallNormal);
-    }
+    pushQuad(positions, normals, pATop, pABot, pBBot, pBTop, wallNormal);
   } else if (direction === 'bottom') {
-    // Wall along the bottom edge of a cell at v=param3, from u=param1 (left) to u=param2 (right)
-    const uLeft = param1;
-    const uRight = param2;
-    const vPos = param3;
-
+    const uLeft = param1, uRight = param2, vPos = param3;
     const pALeft = center.clone().add(u.clone().multiplyScalar(uLeft)).add(v.clone().multiplyScalar(vPos)).add(n.clone().multiplyScalar(dA));
     const pARight = center.clone().add(u.clone().multiplyScalar(uRight)).add(v.clone().multiplyScalar(vPos)).add(n.clone().multiplyScalar(dA));
     const pBLeft = center.clone().add(u.clone().multiplyScalar(uLeft)).add(v.clone().multiplyScalar(vPos)).add(n.clone().multiplyScalar(dB));
     const pBRight = center.clone().add(u.clone().multiplyScalar(uRight)).add(v.clone().multiplyScalar(vPos)).add(n.clone().multiplyScalar(dB));
-
-    // If dA > dB (top is higher), normal points in +v direction
-    const wallNormal = dA > dB ? v.clone() : v.clone().negate();
-
-    if (dA > dB) {
-      pushTri(positions, normals, pARight, pALeft, pBLeft, wallNormal);
-      pushTri(positions, normals, pARight, pBLeft, pBRight, wallNormal);
-    } else {
-      pushTri(positions, normals, pBRight, pBLeft, pALeft, wallNormal);
-      pushTri(positions, normals, pBRight, pALeft, pARight, wallNormal);
-    }
+    const wallNormal = dA > dB ? v.clone().negate() : v.clone();
+    pushQuad(positions, normals, pARight, pALeft, pBLeft, pBRight, wallNormal);
   }
 }
 
-function buildCubeGeometry() {
+// ─── Edge Treatment (Chamfer / Fillet) ───
+function buildEdgeTreatment(size, C, mode) {
+  if (C <= 0 || mode === 'none') return null;
+  const positions = [];
+  const normals = [];
+  const half = size / 2;
+  const edgeHalf = half - C;
+
+  // Adjacent face pairs for 12 cube edges
+  const EDGE_PAIRS = [
+    [0, 2], [0, 3], [0, 4], [0, 5],
+    [1, 2], [1, 3], [1, 4], [1, 5],
+    [2, 4], [2, 5], [3, 4], [3, 5],
+  ];
+
+  for (const [fi, fj] of EDGE_PAIRS) {
+    const n1 = new THREE.Vector3(...FACE_TABLE[fi].normal);
+    const n2 = new THREE.Vector3(...FACE_TABLE[fj].normal);
+    const edgeDir = new THREE.Vector3().crossVectors(n1, n2).normalize();
+
+    if (mode === 'chamfer') {
+      const a = n1.clone().multiplyScalar(half).add(n2.clone().multiplyScalar(edgeHalf)).add(edgeDir.clone().multiplyScalar(-edgeHalf));
+      const b = n1.clone().multiplyScalar(half).add(n2.clone().multiplyScalar(edgeHalf)).add(edgeDir.clone().multiplyScalar(edgeHalf));
+      const c = n1.clone().multiplyScalar(edgeHalf).add(n2.clone().multiplyScalar(half)).add(edgeDir.clone().multiplyScalar(edgeHalf));
+      const d = n1.clone().multiplyScalar(edgeHalf).add(n2.clone().multiplyScalar(half)).add(edgeDir.clone().multiplyScalar(-edgeHalf));
+      const norm = n1.clone().add(n2).normalize();
+      pushQuad(positions, normals, a, b, c, d, norm);
+    } else if (mode === 'fillet') {
+      const segments = 8;
+      const centerLine = n1.clone().multiplyScalar(half - C).add(n2.clone().multiplyScalar(half - C));
+      for (let s = 0; s < segments; s++) {
+        const t0 = (s / segments) * Math.PI / 2;
+        const t1 = ((s + 1) / segments) * Math.PI / 2;
+        const r0 = centerLine.clone().add(n1.clone().multiplyScalar(C * Math.cos(t0))).add(n2.clone().multiplyScalar(C * Math.sin(t0)));
+        const r1 = centerLine.clone().add(n1.clone().multiplyScalar(C * Math.cos(t1))).add(n2.clone().multiplyScalar(C * Math.sin(t1)));
+        const a = r0.clone().add(edgeDir.clone().multiplyScalar(-edgeHalf));
+        const b = r0.clone().add(edgeDir.clone().multiplyScalar(edgeHalf));
+        const c = r1.clone().add(edgeDir.clone().multiplyScalar(edgeHalf));
+        const d = r1.clone().add(edgeDir.clone().multiplyScalar(-edgeHalf));
+        const mt = (t0 + t1) / 2;
+        const norm = n1.clone().multiplyScalar(Math.cos(mt)).add(n2.clone().multiplyScalar(Math.sin(mt))).normalize();
+        pushQuad(positions, normals, a, b, c, d, norm);
+      }
+    }
+  }
+
+  // 8 corners
+  for (const sx of [-1, 1]) {
+    for (const sy of [-1, 1]) {
+      for (const sz of [-1, 1]) {
+        const norm = new THREE.Vector3(sx, sy, sz).normalize();
+        if (mode === 'chamfer') {
+          const p1 = new THREE.Vector3(sx * half, sy * edgeHalf, sz * edgeHalf);
+          const p2 = new THREE.Vector3(sx * edgeHalf, sy * half, sz * edgeHalf);
+          const p3 = new THREE.Vector3(sx * edgeHalf, sy * edgeHalf, sz * half);
+          // Auto-correct winding
+          const ab = new THREE.Vector3().subVectors(p2, p1);
+          const ac = new THREE.Vector3().subVectors(p3, p1);
+          const cross = new THREE.Vector3().crossVectors(ab, ac);
+          if (cross.dot(norm) >= 0) {
+            pushTri(positions, normals, p1, p2, p3, norm);
+          } else {
+            pushTri(positions, normals, p1, p3, p2, norm);
+          }
+        } else if (mode === 'fillet') {
+          // Spherical corner patch
+          const center = new THREE.Vector3(sx * (half - C), sy * (half - C), sz * (half - C));
+          const nX = new THREE.Vector3(sx, 0, 0);
+          const nY = new THREE.Vector3(0, sy, 0);
+          const nZ = new THREE.Vector3(0, 0, sz);
+          const segs = 4;
+          for (let i = 0; i < segs; i++) {
+            const phi0 = (i / segs) * Math.PI / 2;
+            const phi1 = ((i + 1) / segs) * Math.PI / 2;
+            for (let j = 0; j < segs; j++) {
+              const t0 = (j / segs) * Math.PI / 2;
+              const t1 = ((j + 1) / segs) * Math.PI / 2;
+              const pt = (ph, th) => {
+                const cosPh = Math.cos(ph), sinPh = Math.sin(ph);
+                const cosTh = Math.cos(th), sinTh = Math.sin(th);
+                return center.clone()
+                  .add(nX.clone().multiplyScalar(C * cosPh * cosTh))
+                  .add(nY.clone().multiplyScalar(C * sinPh))
+                  .add(nZ.clone().multiplyScalar(C * cosPh * sinTh));
+              };
+              const nm = (ph, th) => {
+                const cosPh = Math.cos(ph), sinPh = Math.sin(ph);
+                const cosTh = Math.cos(th), sinTh = Math.sin(th);
+                return new THREE.Vector3(sx * cosPh * cosTh, sy * sinPh, sz * cosPh * sinTh).normalize();
+              };
+              const a = pt(phi0, t0), b = pt(phi0, t1), c = pt(phi1, t1), d = pt(phi1, t0);
+              const midPhi = (phi0 + phi1) / 2, midT = (t0 + t1) / 2;
+              pushQuad(positions, normals, a, b, c, d, nm(midPhi, midT));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+  return geo;
+}
+
+// ─── Flip Normals ───
+function flipGeometryNormals(geo) {
+  const pos = geo.attributes.position.array;
+  const norm = geo.attributes.normal.array;
+  // Negate all normals
+  for (let i = 0; i < norm.length; i++) norm[i] = -norm[i];
+  // Reverse winding: swap vertex 1 and vertex 2 of each triangle
+  for (let i = 0; i < pos.length; i += 9) {
+    for (let j = 0; j < 3; j++) {
+      const tmp = pos[i + 3 + j];
+      pos[i + 3 + j] = pos[i + 6 + j];
+      pos[i + 6 + j] = tmp;
+      const tmpN = norm[i + 3 + j];
+      norm[i + 3 + j] = norm[i + 6 + j];
+      norm[i + 6 + j] = tmpN;
+    }
+  }
+  geo.attributes.position.needsUpdate = true;
+  geo.attributes.normal.needsUpdate = true;
+}
+
+// ─── Rebuild ───
+function rebuild() {
+  // Clear old meshes
+  while (cubeGroup.children.length) {
+    const m = cubeGroup.children[0];
+    cubeGroup.remove(m);
+    m.geometry.dispose();
+  }
+  faceMeshes = [];
+
   const faceURLs = distributeURLs();
-  const geometries = [];
   const warnings = [];
   let hasAnyQR = false;
+  let totalTris = 0;
 
   for (let i = 0; i < 6; i++) {
     const url = faceURLs[i];
@@ -650,97 +942,65 @@ function buildCubeGeometry() {
       } else if (qrData) {
         hasAnyQR = true;
         const totalMods = qrData.count + 8;
-        const pitch = cubeSize / totalMods;
+        const effectiveSize = edgeMode !== 'none' ? cubeSize - 2 * edgeSize : cubeSize;
+        const pitch = effectiveSize / totalMods;
         if (pitch < 1.0) {
           warnings.push({
             face: FACE_TABLE[i].name,
-            msg: `Module pitch ${pitch.toFixed(2)}mm — may be too small to print cleanly. Use a shorter URL or larger cube.`
+            msg: `Module pitch ${pitch.toFixed(2)}mm — may be too small to print. Use a shorter URL or larger cube.`
           });
         }
       }
     }
 
-    const geo = buildFaceGeometry(i, qrData, cubeSize, engraveDepth);
-    if (geo) geometries.push(geo);
+    const inset = edgeMode !== 'none' ? edgeSize : 0;
+    const geo = buildFaceGeometry(i, qrData, cubeSize, engraveDepth, inset);
+    if (normalsFlipped) flipGeometryNormals(geo);
+    const mesh = new THREE.Mesh(geo, defaultMaterial);
+    mesh.userData.faceIndex = i;
+    cubeGroup.add(mesh);
+    faceMeshes.push(mesh);
+    totalTris += geo.attributes.position.count / 3;
   }
 
-  if (geometries.length === 0) return { mesh: null, triCount: 0, warnings };
-
-  const merged = BufferGeometryUtils.mergeGeometries(geometries, false);
-  const triCount = merged.attributes.position.count / 3;
-
-  return { geometry: merged, triCount, warnings, hasAnyQR };
-}
-
-// ─── Rebuild ───
-function rebuild() {
-  if (cubeMesh) {
-    scene.remove(cubeMesh);
-    cubeMesh.geometry.dispose();
-    cubeMesh.material.dispose();
-    cubeMesh = null;
+  // Edge treatment geometry
+  if (edgeMode !== 'none' && edgeSize > 0) {
+    const edgeGeo = buildEdgeTreatment(cubeSize, edgeSize, edgeMode);
+    if (edgeGeo) {
+      if (normalsFlipped) flipGeometryNormals(edgeGeo);
+      const edgeMesh = new THREE.Mesh(edgeGeo, defaultMaterial);
+      edgeMesh.userData.faceIndex = -1;
+      cubeGroup.add(edgeMesh);
+      totalTris += edgeGeo.attributes.position.count / 3;
+    }
   }
 
-  const result = buildCubeGeometry();
+  // Reapply highlight if an input is focused
+  applyHighlight();
 
-  if (result.geometry) {
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xcccccc,
-      roughness: 0.6,
-      metalness: 0.1,
-      flatShading: false,
-    });
-    cubeMesh = new THREE.Mesh(result.geometry, material);
-    scene.add(cubeMesh);
-  }
-
-  // Update warnings
+  // Warnings
   const warningsEl = document.getElementById('warnings');
   warningsEl.innerHTML = '';
-  for (const w of result.warnings) {
+  for (const w of warnings) {
     const div = document.createElement('div');
     div.className = 'warning' + (w.msg.includes('error') ? ' error' : '');
     div.textContent = `${w.face}: ${w.msg}`;
     warningsEl.appendChild(div);
   }
 
-  // Update status
-  const status = document.getElementById('status');
+  // Status
   const activeCount = urls.filter(u => u.trim()).length;
-  if (result.triCount > 0) {
-    status.textContent = `${result.triCount.toLocaleString()} triangles · ${activeCount} URL${activeCount !== 1 ? 's' : ''} · ${cubeSize}mm`;
+  const status = document.getElementById('status');
+  if (totalTris > 0 && hasAnyQR) {
+    status.textContent = `${totalTris.toLocaleString()} triangles · ${activeCount} URL${activeCount !== 1 ? 's' : ''} · ${cubeSize}mm`;
   } else {
     status.textContent = 'Enter a URL to generate QR cube';
   }
 
-  // Update distribution info
-  updateDistInfo();
+  // Face tags
+  updateFaceTags();
 
-  // Export button
-  document.getElementById('exportBtn').disabled = !result.hasAnyQR;
-}
-
-function updateDistInfo() {
-  const el = document.getElementById('distInfo');
-  const active = urls.filter(u => u.trim());
-  if (active.length === 0) {
-    el.style.display = 'none';
-    return;
-  }
-  el.style.display = 'block';
-  const faceURLs = distributeURLs();
-  const lines = [];
-  const faceNames = ['Front', 'Back', 'Right', 'Left', 'Top', 'Bottom'];
-  for (let i = 0; i < 6; i++) {
-    const url = faceURLs[i];
-    if (url) {
-      const short = url.length > 28 ? url.slice(0, 28) + '…' : url;
-      lines.push(`${faceNames[i]}: ${short}`);
-    } else {
-      lines.push(`${faceNames[i]}: blank`);
-    }
-  }
-  el.textContent = lines.join('\n');
+  document.getElementById('exportBtn').disabled = !hasAnyQR;
 }
 
 function scheduleRebuild(delay = 0) {
@@ -748,36 +1008,141 @@ function scheduleRebuild(delay = 0) {
   rebuildTimeout = setTimeout(rebuild, delay);
 }
 
+// ─── Face Highlight ───
+function applyHighlight() {
+  for (let i = 0; i < faceMeshes.length; i++) {
+    faceMeshes[i].material = defaultMaterial;
+  }
+  if (focusedInputIndex >= 0) {
+    const faces = getFacesForInput(focusedInputIndex);
+    for (const f of faces) {
+      if (faceMeshes[f]) faceMeshes[f].material = highlightMaterial;
+    }
+  }
+  // Also light up face tags
+  for (let i = 0; i < 6; i++) {
+    const tag = faceTagEls[i];
+    if (!tag) continue;
+    tag.classList.toggle('lit', i === focusedInputIndex && urls[i]?.trim());
+  }
+}
+
+// ─── Face Tags ───
+const faceTagEls = [];
+
+function updateFaceTags() {
+  const dist = distributeURLs();
+  for (let i = 0; i < 6; i++) {
+    const url = urls[i]?.trim();
+    const tag = faceTagEls[i];
+    if (!tag) continue;
+    if (!url) { tag.textContent = ''; continue; }
+    const names = [];
+    for (let f = 0; f < 6; f++) {
+      if (dist[f] === url) names.push(FACE_TABLE[f].name);
+    }
+    tag.textContent = names.join(', ');
+  }
+}
+
+// ─── Theme System ───
+function applyTheme() {
+  const root = document.documentElement;
+  root.style.setProperty('--accent', currentAccent.hex);
+  root.style.setProperty('--accent-dim', currentAccent.dim);
+
+  document.body.classList.toggle('light', !isDarkMode);
+
+  // Scene
+  const sceneBg = isDarkMode ? 0x0a0a0a : 0xe0e0e0;
+  scene.background = new THREE.Color(sceneBg);
+
+  // Grid
+  if (isDarkMode) {
+    gridHelper.material.color.setHex(0x1a1a1a);
+    gridHelper.material.opacity = 1;
+  } else {
+    gridHelper.material.color.setHex(0xcccccc);
+    gridHelper.material.opacity = 1;
+  }
+
+  updateMaterials();
+
+  // Popover swatch active states
+  document.querySelectorAll('.swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.name === currentAccent.name);
+  });
+
+  // Mode toggle text
+  document.getElementById('modeToggle').textContent = isDarkMode ? 'Switch to Light' : 'Switch to Dark';
+
+  saveTheme();
+}
+
 // ─── UI Setup ───
+
+// URL inputs
 const urlGroup = document.getElementById('urlGroup');
+const urlInputs = [];
 for (let i = 0; i < 6; i++) {
   const row = document.createElement('div');
   row.className = 'url-row';
+
   const label = document.createElement('label');
   label.textContent = (i + 1);
+
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = i === 0 ? 'https://example.com' : '';
   input.spellcheck = false;
   input.autocomplete = 'off';
+
+  const tag = document.createElement('span');
+  tag.className = 'face-tags';
+  faceTagEls.push(tag);
+
   input.addEventListener('input', () => {
     urls[i] = input.value;
     scheduleRebuild(300);
   });
+
+  input.addEventListener('focus', () => {
+    focusedInputIndex = i;
+    applyHighlight();
+  });
+
+  input.addEventListener('blur', () => {
+    focusedInputIndex = -1;
+    applyHighlight();
+  });
+
   row.appendChild(label);
   row.appendChild(input);
+  row.appendChild(tag);
   urlGroup.appendChild(row);
+  urlInputs.push(input);
 }
 
 // Sliders
 const sizeSlider = document.getElementById('sizeSlider');
 const depthSlider = document.getElementById('depthSlider');
+const edgeSlider = document.getElementById('edgeSlider');
 const sizeVal = document.getElementById('sizeVal');
 const depthVal = document.getElementById('depthVal');
+const edgeVal = document.getElementById('edgeVal');
+const edgeBtns = document.querySelectorAll('.edge-btn');
 
 sizeSlider.addEventListener('input', () => {
   cubeSize = parseFloat(sizeSlider.value);
   sizeVal.textContent = `${cubeSize} mm`;
+  // Cap edge size to 15% of cube size
+  const maxEdge = Math.round(cubeSize * 0.15 * 10) / 10;
+  edgeSlider.max = maxEdge;
+  if (edgeSize > maxEdge) {
+    edgeSize = maxEdge;
+    edgeSlider.value = edgeSize;
+    updateEdgeLabel();
+  }
   scheduleRebuild(0);
 });
 
@@ -787,11 +1152,54 @@ depthSlider.addEventListener('input', () => {
   scheduleRebuild(0);
 });
 
+// Edge treatment
+edgeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    edgeMode = btn.dataset.mode;
+    edgeBtns.forEach(b => b.classList.toggle('active', b === btn));
+    edgeSlider.disabled = edgeMode === 'none';
+    updateEdgeLabel();
+    scheduleRebuild(0);
+  });
+});
+
+edgeSlider.addEventListener('input', () => {
+  edgeSize = parseFloat(edgeSlider.value);
+  updateEdgeLabel();
+  scheduleRebuild(0);
+});
+
+function updateEdgeLabel() {
+  if (edgeMode === 'none') {
+    edgeVal.textContent = 'None';
+  } else {
+    const label = edgeMode.charAt(0).toUpperCase() + edgeMode.slice(1);
+    edgeVal.textContent = `${label} ${edgeSize.toFixed(1)} mm`;
+  }
+}
+
+// Flip normals
+document.getElementById('flipBtn').addEventListener('click', () => {
+  normalsFlipped = !normalsFlipped;
+  document.getElementById('flipBtn').classList.toggle('active', normalsFlipped);
+  // Flip normals on all meshes without full rebuild
+  for (const child of cubeGroup.children) {
+    flipGeometryNormals(child.geometry);
+  }
+});
+
 // Export
 document.getElementById('exportBtn').addEventListener('click', () => {
-  if (!cubeMesh) return;
+  if (faceMeshes.length === 0) return;
+  const geos = [];
+  for (const child of cubeGroup.children) {
+    geos.push(child.geometry);
+  }
+  const merged = BufferGeometryUtils.mergeGeometries(geos, false);
+  const tmpMesh = new THREE.Mesh(merged, defaultMaterial);
   const exporter = new STLExporter();
-  const result = exporter.parse(cubeMesh, { binary: true });
+  const result = exporter.parse(tmpMesh, { binary: true });
+  merged.dispose();
   const blob = new Blob([result], { type: 'application/octet-stream' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
@@ -800,7 +1208,46 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   URL.revokeObjectURL(link.href);
 });
 
-// Initial build (blank cube)
+// Theme popover
+const titleBtn = document.getElementById('titleBtn');
+const themePopover = document.getElementById('themePopover');
+const swatchesEl = document.getElementById('swatches');
+
+for (const ac of ACCENT_COLORS) {
+  const s = document.createElement('div');
+  s.className = 'swatch';
+  s.style.background = ac.hex;
+  s.dataset.name = ac.name;
+  s.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentAccent = ac;
+    applyTheme();
+    // Reapply highlight if active
+    if (focusedInputIndex >= 0) applyHighlight();
+  });
+  swatchesEl.appendChild(s);
+}
+
+document.getElementById('modeToggle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  isDarkMode = !isDarkMode;
+  applyTheme();
+});
+
+titleBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  themePopover.classList.toggle('open');
+});
+
+document.addEventListener('click', (e) => {
+  if (!themePopover.contains(e.target) && e.target !== titleBtn) {
+    themePopover.classList.remove('open');
+  }
+});
+
+// Init
+edgeSlider.max = Math.round(cubeSize * 0.15 * 10) / 10;
+applyTheme();
 rebuild();
 </script>
 </body>
