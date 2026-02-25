@@ -162,8 +162,6 @@ h1 span { color: var(--text2); font-weight: 400; }
 }
 
 .url-row input {
-  flex: 1;
-  min-width: 0;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -179,17 +177,35 @@ h1 span { color: var(--text2); font-weight: 400; }
 .url-row input::placeholder { color: #444; }
 body.light .url-row input::placeholder { color: #aaa; }
 
+.url-input-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.url-input-wrap input {
+  width: 100%;
+}
+
 .face-tags {
   font-family: 'Space Mono', monospace;
   font-size: 9px;
   color: var(--text2);
   white-space: nowrap;
-  min-width: 40px;
-  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: color 0.15s;
+  min-height: 12px;
 }
 
 .face-tags.lit { color: var(--accent); }
+
+.segment-control { display:flex; background:var(--bg); border-radius:8px; padding:3px; gap:2px; }
+.segment-btn { flex:1; padding:6px 2px; border:none; background:none; color:var(--text2); font-size:10px; font-weight:700; font-family:'Space Mono',monospace; border-radius:5px; cursor:pointer; transition:all 0.2s ease; letter-spacing:0.5px; white-space:nowrap; text-transform:uppercase; }
+.segment-btn:hover { color:var(--text); background:var(--border); }
+.segment-btn.active { background:var(--accent-bg); color:var(--accent); box-shadow:0 1px 4px rgba(0,0,0,0.15); }
 
 /* Sliders */
 .slider-group { display: flex; flex-direction: column; gap: 14px; }
@@ -356,6 +372,86 @@ input[type="range"]::-webkit-slider-thumb {
   }
   #viewport { height: 50vh; }
 }
+
+/* ── Viewport Overlay Controls ── */
+.top-controls {
+  position: absolute; top: 16px; right: 16px; z-index: 20;
+  display: flex; gap: 6px; align-items: center;
+}
+.ctrl-btn-wrap { position: relative; }
+.ctrl-btn {
+  background: var(--surface); backdrop-filter: blur(20px);
+  border: 1px solid var(--border); border-radius: 10px;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text2);
+  transition: all 0.2s ease; position: relative; flex-shrink: 0;
+}
+.ctrl-btn:hover { background: var(--surface2); color: var(--accent); border-color: var(--accent-bg); }
+.ctrl-btn svg { width: 15px; height: 15px; }
+
+.hover-popover {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  padding: 12px 14px; background: var(--surface);
+  backdrop-filter: blur(32px); border: 1px solid var(--border);
+  border-radius: 12px; width: 180px;
+  opacity: 0; pointer-events: none; transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease; z-index: 25;
+}
+.hover-popover::before {
+  content: ''; position: absolute; top: -14px; left: -20px; right: -20px;
+  height: 16px; background: transparent;
+}
+.ctrl-btn-wrap:hover > .hover-popover {
+  opacity: 1; pointer-events: auto; transform: translateY(0);
+}
+
+.ov-mode-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text2);
+  text-align: center; margin-bottom: 10px;
+}
+.ov-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; color: var(--text2); margin-bottom: 4px;
+}
+.ov-slider-row { margin-bottom: 8px; }
+.ov-slider-row:last-child { margin-bottom: 0; }
+
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; margin-bottom: 8px; }
+.toggle-label { font-size: 11px; color: var(--text2); }
+.toggle { position: relative; width: 36px; height: 20px; cursor: pointer; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 10px; transition: background 0.3s ease; }
+.toggle input:checked + .toggle-track { background: var(--accent-bg); }
+.toggle-track::after {
+  content: ''; position: absolute; width: 14px; height: 14px;
+  background: var(--text2); border-radius: 50%; top: 3px; left: 3px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+}
+.toggle input:checked + .toggle-track::after { transform: translateX(16px); background: var(--accent); }
+
+.mat-preset-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.mat-preset-btn {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 6px 2px 4px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  transition: all 0.15s ease; font-family: inherit;
+}
+.mat-preset-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+.mat-preset-btn.active { border-color: var(--accent); background: var(--accent-bg); }
+.mat-swatch { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.12); }
+.mat-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 7px; font-weight: 700; letter-spacing: 0.3px;
+  text-transform: uppercase; color: var(--text2); line-height: 1;
+}
+.mat-preset-btn.active .mat-name { color: var(--accent); }
+
+.icon-moon { display: none; }
+body.light .icon-sun { display: none; }
+body.light .icon-moon { display: block; }
 </style>
 </head>
 <body>
@@ -382,16 +478,16 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="slider-row">
         <div class="slider-header">
           <span class="slider-label">Cube Size</span>
-          <span class="slider-value" id="sizeVal">50 mm</span>
+          <span class="slider-value" id="sizeVal">44 mm</span>
         </div>
-        <input type="range" id="sizeSlider" min="30" max="120" value="50" step="1">
+        <input type="range" id="sizeSlider" min="20" max="200" value="44" step="1">
       </div>
       <div class="slider-row">
         <div class="slider-header">
           <span class="slider-label">Engrave Depth</span>
           <span class="slider-value" id="depthVal">1.5 mm</span>
         </div>
-        <input type="range" id="depthSlider" min="0.5" max="3" value="1.5" step="0.1">
+        <input type="range" id="depthSlider" min="0.1" max="5" value="1.5" step="0.1">
       </div>
       <div class="slider-row">
         <div class="slider-header">
@@ -418,7 +514,98 @@ input[type="range"]::-webkit-slider-thumb {
   <div id="status">Ready</div>
 </div>
 
-<div id="viewport"></div>
+<div id="viewport">
+  <div class="top-controls" id="topControls">
+
+    <!-- View Mode -->
+    <div class="ctrl-btn-wrap" id="viewWrap">
+      <button class="ctrl-btn" title="Display mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/>
+        </svg>
+      </button>
+      <div class="hover-popover" id="viewPopover" style="width:148px">
+        <div class="ov-mode-label">Display</div>
+        <div id="viewModeControl" style="display:flex;flex-direction:column;gap:3px;margin-top:8px">
+          <button class="segment-btn" data-mode="wireframe" style="text-align:left;padding:7px 10px">Wireframe</button>
+          <button class="segment-btn" data-mode="ghosted"   style="text-align:left;padding:7px 10px">Ghosted</button>
+          <button class="segment-btn" data-mode="shaded"    style="text-align:left;padding:7px 10px">Shaded</button>
+          <button class="segment-btn active" data-mode="rendered" style="text-align:left;padding:7px 10px">Rendered</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="ctrl-btn-wrap" id="gridWrap">
+      <button class="ctrl-btn" title="Grid settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="3" x2="3" y2="21"/><line x1="9" y1="3" x2="9" y2="21"/>
+          <line x1="15" y1="3" x2="15" y2="21"/><line x1="21" y1="3" x2="21" y2="21"/>
+          <line x1="3" y1="3" x2="21" y2="3"/><line x1="3" y1="9" x2="21" y2="9"/>
+          <line x1="3" y1="15" x2="21" y2="15"/><line x1="3" y1="21" x2="21" y2="21"/>
+        </svg>
+      </button>
+      <div class="hover-popover" id="gridPopover">
+        <div class="ov-mode-label">Grid</div>
+        <div class="toggle-row">
+          <span class="toggle-label">Show Grid</span>
+          <label class="toggle"><input type="checkbox" id="gridVisibleChk" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="ov-slider-row">
+          <div class="ov-label">Color</div>
+          <input type="range" id="gridColorSlider" min="0" max="255" step="1" value="200">
+        </div>
+        <div class="ov-slider-row">
+          <div class="ov-label">Cell Size</div>
+          <input type="range" id="gridCellSizeSlider" min="1" max="20" step="0.5" value="5">
+        </div>
+        <div class="ov-slider-row">
+          <div class="ov-label">Extents</div>
+          <input type="range" id="gridExtentsSlider" min="3" max="500" step="5" value="100">
+        </div>
+        <div class="ov-slider-row">
+          <div class="ov-label">Falloff</div>
+          <input type="range" id="gridFalloffSlider" min="0" max="100" step="1" value="50">
+        </div>
+      </div>
+    </div>
+
+    <!-- Material -->
+    <div class="ctrl-btn-wrap" id="matWrap">
+      <button class="ctrl-btn" title="Object material color">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2L22 8L12 14L2 8Z" fill="currentColor" opacity="0.35" stroke="none"/>
+          <path d="M2 8L12 14V22L2 16Z" fill="currentColor" opacity="0.15" stroke="none"/>
+          <path d="M22 8L12 14V22L22 16Z" fill="currentColor" opacity="0.25" stroke="none"/>
+          <path d="M12 2L22 8L12 14L2 8Z"/>
+          <line x1="12" y1="14" x2="12" y2="22"/>
+          <line x1="2" y1="8" x2="2" y2="16"/>
+          <line x1="22" y1="8" x2="22" y2="16"/>
+        </svg>
+      </button>
+      <div class="hover-popover" id="matPopover" style="width:196px">
+        <div class="ov-mode-label">Material</div>
+        <div class="mat-preset-grid" id="matPresetGrid"></div>
+        <div class="preset-params" id="presetParams"></div>
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <button class="ctrl-btn" id="themeIconBtn" title="Toggle light / dark">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+
+  </div>
+</div>
 
 <script type="importmap">
 {
@@ -448,7 +635,7 @@ const ACCENT_COLORS = [
 ];
 
 // ─── State ───
-let cubeSize = 50;
+let cubeSize = 44;
 let engraveDepth = 1.5;
 let urls = ['', '', '', '', '', ''];
 let faceMeshes = []; // array of THREE.Mesh, one per cube face
@@ -459,6 +646,16 @@ let focusedInputIndex = -1;
 let currentAccent = ACCENT_COLORS[0];
 let isDarkMode = true;
 let rebuildTimeout = null;
+let viewMode = 'rendered';
+let currentPresetId = 'solid';
+const presetParams = {};
+let activePresetMat = null;
+let gridVisible = true;
+let gridColorVal = 200;
+let gridCellSize = 5;
+let gridExtents = 100;
+let gridFalloff = 0.5;
+let GROUND_Y = -(cubeSize / 2) - 0.05;
 
 // Load saved theme
 try {
@@ -501,10 +698,92 @@ scene.add(fillLight);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-// Grid
-const gridHelper = new THREE.GridHelper(120, 24, 0x222222, 0x1a1a1a);
-gridHelper.position.y = -40;
-scene.add(gridHelper);
+// Grid (shader-based with falloff)
+function buildGridGeometry(cellSize, extents) {
+  const positions = [];
+  for (let x = -extents; x <= extents + 0.001; x += cellSize) {
+    positions.push(x, 0, -extents, x, 0, extents);
+  }
+  for (let z = -extents; z <= extents + 0.001; z += cellSize) {
+    positions.push(-extents, 0, z, extents, 0, z);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  return geo;
+}
+
+const gridMat = new THREE.ShaderMaterial({
+  transparent: true,
+  depthWrite: false,
+  uniforms: {
+    uColor:   { value: new THREE.Color(0xffffff) },
+    uHalf:    { value: gridExtents },
+    uFalloff: { value: gridFalloff },
+  },
+  vertexShader: `
+    varying vec2 vXZ;
+    void main() {
+      vXZ = position.xz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 uColor;
+    uniform float uHalf, uFalloff;
+    varying vec2 vXZ;
+    void main() {
+      float d = length(vXZ) / uHalf;
+      float fadeStart = 1.0 - uFalloff;
+      float alpha = 1.0 - smoothstep(fadeStart, 1.0, d);
+      gl_FragColor = vec4(uColor, alpha * 0.45);
+    }
+  `,
+});
+let gridMesh = new THREE.LineSegments(buildGridGeometry(gridCellSize, gridExtents), gridMat);
+gridMesh.position.y = GROUND_Y;
+gridMesh.visible = gridVisible;
+scene.add(gridMesh);
+
+function updateGridColor() {
+  const lightness = isDarkMode ? gridColorVal / 255 : 1 - gridColorVal / 255;
+  gridMat.uniforms.uColor.value.setHSL(0, 0, lightness);
+}
+
+function rebuildGrid() {
+  gridMesh.geometry.dispose();
+  gridMesh.geometry = buildGridGeometry(gridCellSize, gridExtents);
+  gridMat.uniforms.uHalf.value = gridExtents;
+  gridMat.uniforms.uFalloff.value = gridFalloff;
+}
+
+// ─── Floating ambient shapes ───
+const floatingGroup = new THREE.Group();
+scene.add(floatingGroup);
+const FLOAT_GEOS = [
+  new THREE.IcosahedronGeometry(1, 0),
+  new THREE.OctahedronGeometry(1, 0),
+  new THREE.TetrahedronGeometry(1, 0),
+  new THREE.TorusGeometry(0.7, 0.3, 4, 6),
+  new THREE.DodecahedronGeometry(1, 0),
+];
+const floatingMat = new THREE.MeshBasicMaterial({ color: 0x8844FF, transparent: true, opacity: 0.06, wireframe: true });
+const floatingShapes = [];
+for (let i = 0; i < 22; i++) {
+  const geo = FLOAT_GEOS[i % FLOAT_GEOS.length].clone();
+  const scale = 6 + Math.random() * 18;
+  const mesh = new THREE.Mesh(geo, floatingMat);
+  const r = 180 + Math.random() * 180;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  mesh.position.set(r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
+  mesh.scale.setScalar(scale);
+  mesh.rotation.set(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2);
+  mesh.userData.rv = new THREE.Vector3(
+    (Math.random()-0.5)*0.004, (Math.random()-0.5)*0.004, (Math.random()-0.5)*0.004
+  );
+  floatingGroup.add(mesh);
+  floatingShapes.push(mesh);
+}
 
 // Cube group
 const cubeGroup = new THREE.Group();
@@ -520,35 +799,304 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+let holoHue = 270;
+const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  if (activePresetMat?.userData?.shader?.uniforms?.uTime) {
+    activePresetMat.userData.shader.uniforms.uTime.value += dt;
+  }
   controls.update();
+  floatingShapes.forEach(m => {
+    m.rotation.x += m.userData.rv.x;
+    m.rotation.y += m.userData.rv.y;
+    m.rotation.z += m.userData.rv.z;
+  });
+  if (currentPresetId === 'holographic') {
+    holoHue = (holoHue + 0.4) % 360;
+    const c = hslAccent(holoHue, 0.85, 0.65);
+    document.documentElement.style.setProperty('--accent', c.hex);
+    document.documentElement.style.setProperty('--accent-dim', c.dim);
+  }
   renderer.render(scene, camera);
 }
 animate();
 
 // ─── Materials ───
-let defaultMaterial = new THREE.MeshStandardMaterial({
-  color: 0xcccccc,
-  roughness: 0.6,
-  metalness: 0.1,
-});
+const VIEW_MODES = {
+  wireframe: { shadows: false },
+  ghosted:   { shadows: false },
+  shaded:    { shadows: true },
+  rendered:  { shadows: true },
+};
 
-let highlightMaterial = new THREE.MeshStandardMaterial({
-  color: currentAccent.three,
-  emissive: currentAccent.three,
-  emissiveIntensity: 0.35,
-  roughness: 0.4,
-  metalness: 0.1,
-});
+// ─── GLSL Snippets ───
+const GLSL_WV = `varying vec3 vWN; varying vec3 vWP;`;
+const GLSL_WC = `vWN = normalize((modelMatrix * vec4(transformedNormal, 0.0)).xyz); vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;`;
+const GLSL_HSL = `vec3 hsl2rgb(float h,float s,float l){vec3 c=clamp(abs(mod(h*6.0+vec3(0,.33,.67),6.0)-3.0)-1.0,0.0,1.0);return l+s*(c-0.5)*(1.0-abs(2.0*l-1.0));}`;
 
-function updateMaterials() {
-  const cubeColor = isDarkMode ? 0xcccccc : 0x999999;
-  defaultMaterial.color.setHex(cubeColor);
-  defaultMaterial.needsUpdate = true;
-  highlightMaterial.color.setHex(currentAccent.three);
-  highlightMaterial.emissive.setHex(currentAccent.three);
-  highlightMaterial.needsUpdate = true;
+const PRESETS = [
+  { id:'solid',       name:'Solid',    swatch:'background:linear-gradient(135deg,#7088cc,#8098dd)' },
+  { id:'glass',       name:'Glass',    swatch:'background:rgba(180,200,255,0.12);border:1.5px solid rgba(200,220,255,0.4)' },
+  { id:'chrome',      name:'Chrome',   swatch:'background:linear-gradient(160deg,#888,#fff 40%,#666 60%,#ddd)' },
+  { id:'clay',        name:'Clay',     swatch:'background:#d4b89c' },
+  { id:'holographic', name:'Holo',     swatch:'background:conic-gradient(from 0deg,#ff6b6b,#feca57,#48dbfb,#ff9ff3,#ff6b6b)' },
+  { id:'neon',        name:'Neon',     swatch:'background:#0a0a1a;border:1.5px solid #8844FF;box-shadow:0 0 6px #8844FF' },
+  { id:'gradient',    name:'Gradient', swatch:'background:linear-gradient(135deg,#7044ee,#44aadd)' },
+];
+
+const PRESET_SLIDERS = {
+  solid: [
+    { key:'color', label:'Color',     min:0, max:360, def:230, rainbow:true,
+      apply:(v,m)=>{ m.color.setHSL(v/360, 0.5, 0.65); }},
+    { key:'rough', label:'Roughness', min:0, max:100, def:20,
+      apply:(v,m)=>{ m.roughness = v/100; }},
+  ],
+  glass: [
+    { key:'rough', label:'Roughness', min:0, max:100, def:5,
+      apply:(v,m)=>{ m.roughness = v/100; }},
+    { key:'tint',  label:'Tint',      min:0, max:360, def:0, rainbow:true,
+      apply:(v,m)=>{ if(v<5) m.color.set(0xffffff); else m.color.setHSL(v/360, 0.3, 0.92); }},
+  ],
+  chrome: [
+    { key:'env',  label:'Brightness', min:100, max:400, def:250,
+      apply:(v,m)=>{ m.envMapIntensity = v/100; }},
+    { key:'tint', label:'Tint',       min:0, max:360, def:0, rainbow:true,
+      apply:(v,m)=>{ if(v<5) m.color.set(0xffffff); else m.color.setHSL(v/360, 0.35, 0.75); }},
+  ],
+  clay: [
+    { key:'color', label:'Color',     min:0, max:360, def:25, rainbow:true,
+      apply:(v,m)=>{ m.color.setHSL(v/360, 0.35, 0.75); m.sheenColor.setHSL(v/360, 0.2, 0.7); }},
+    { key:'rough', label:'Roughness', min:30, max:100, def:85,
+      apply:(v,m)=>{ m.roughness = v/100; }},
+  ],
+  holographic: [
+    { key:'speed', label:'Speed',     min:5, max:100, def:30,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uSpeed) u.uSpeed.value=v/100; }},
+    { key:'mix',   label:'Intensity', min:10, max:100, def:50,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uMix) u.uMix.value=v/100; }},
+  ],
+  neon: [
+    { key:'hue',   label:'Color',   min:0, max:360, def:270, rainbow:true,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uH1){ u.uH1.value=v/360; u.uH2.value=((v+120)%360)/360; } }},
+    { key:'glow',  label:'Glow',    min:50, max:500, def:250,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uGlow) u.uGlow.value=v/100; }},
+    { key:'width', label:'Width',   min:10, max:90, def:50,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uSpread) u.uSpread.value=(100-v)/20; }},
+  ],
+  gradient: [
+    { key:'color1', label:'Color 1',   min:0, max:360, def:263, rainbow:true,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uGH1) u.uGH1.value=v/360; }},
+    { key:'color2', label:'Color 2',   min:0, max:360, def:187, rainbow:true,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uGH2) u.uGH2.value=v/360; }},
+    { key:'sat',    label:'Saturation',min:10, max:100, def:75,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uSat) u.uSat.value=v/100; }},
+    { key:'lit',    label:'Lightness', min:30, max:80,  def:60,
+      apply:(v,m)=>{ const u=m.userData?.shader?.uniforms; if(u?.uLit) u.uLit.value=v/100; }},
+  ],
+};
+
+function gp(preset, key, def) { const v = presetParams[`${preset}-${key}`]; return v !== undefined ? v : def; }
+
+function buildPresetMaterial(id) {
+  switch (id) {
+    case 'solid': {
+      const col = gp('solid','color',230), rough = gp('solid','rough',20);
+      const mat = new THREE.MeshPhysicalMaterial({ metalness:0.0, roughness:rough/100, clearcoat:0.6, clearcoatRoughness:0.1, envMapIntensity:1.2 });
+      mat.color.setHSL(col/360, 0.5, 0.65);
+      return mat;
+    }
+    case 'glass': {
+      const rough = gp('glass','rough',5), tint = gp('glass','tint',0);
+      const mat = new THREE.MeshPhysicalMaterial({ metalness:0.0, roughness:rough/100, transmission:0.92, thickness:1.5, ior:1.5, envMapIntensity:1.5 });
+      if (tint < 5) mat.color.set(0xffffff); else mat.color.setHSL(tint/360, 0.3, 0.92);
+      return mat;
+    }
+    case 'chrome': {
+      const env = gp('chrome','env',250), tint = gp('chrome','tint',0);
+      const mat = new THREE.MeshPhysicalMaterial({ metalness:1.0, roughness:0.02, clearcoat:0.5, envMapIntensity:env/100 });
+      if (tint < 5) mat.color.set(0xffffff); else mat.color.setHSL(tint/360, 0.35, 0.75);
+      return mat;
+    }
+    case 'clay': {
+      const col = gp('clay','color',25), rough = gp('clay','rough',85);
+      const mat = new THREE.MeshPhysicalMaterial({ metalness:0.0, roughness:rough/100, sheen:1.0, sheenRoughness:0.4, sheenColor:new THREE.Color(), envMapIntensity:0.5 });
+      mat.color.setHSL(col/360, 0.35, 0.75);
+      mat.sheenColor.setHSL(col/360, 0.2, 0.7);
+      return mat;
+    }
+    case 'holographic': {
+      const spd = gp('holographic','speed',30)/100, mix = gp('holographic','mix',50)/100;
+      const mat = new THREE.MeshPhysicalMaterial({ color:0xcccccc, metalness:0.3, roughness:0.15, clearcoat:1.0, clearcoatRoughness:0.05, envMapIntensity:1.2 });
+      mat.onBeforeCompile = (shader) => {
+        shader.uniforms.uTime  = { value:0 };
+        shader.uniforms.uSpeed = { value:spd };
+        shader.uniforms.uMix   = { value:mix };
+        shader.vertexShader = shader.vertexShader
+          .replace('#include <common>', `#include <common>
+${GLSL_WV}`)
+          .replace('#include <worldpos_vertex>', `#include <worldpos_vertex>
+${GLSL_WC}`);
+        shader.fragmentShader = shader.fragmentShader
+          .replace('#include <common>', `#include <common>
+uniform float uTime,uSpeed,uMix;
+${GLSL_WV}`)
+          .replace('#include <dithering_fragment>',
+            `vec3 vd=normalize(cameraPosition-vWP);float fr=pow(1.0-abs(dot(vWN,vd)),3.0);`+
+            `float ang=atan(vWN.z,vWN.x);`+
+            `vec3 rain=0.5+0.5*cos(6.2832*(ang*0.5+uTime*uSpeed+vec3(0,.33,.67)));`+
+            `gl_FragColor.rgb=mix(gl_FragColor.rgb,rain,uMix+fr*(1.0-uMix));`+
+            `gl_FragColor.rgb+=fr*rain*uMix*0.8;
+#include <dithering_fragment>`);
+        mat.userData.shader = shader;
+      };
+      return mat;
+    }
+    case 'neon': {
+      const hue = gp('neon','hue',270);
+      const glow = gp('neon','glow',250)/100, width = gp('neon','width',50);
+      const spread = (100 - width) / 20;
+      const h1 = hue/360, h2 = ((hue+120)%360)/360;
+      const mat = new THREE.MeshPhysicalMaterial({ color:0x080810, metalness:0.2, roughness:0.3, clearcoat:1.0, envMapIntensity:0.3 });
+      mat.onBeforeCompile = (shader) => {
+        shader.uniforms.uH1     = { value:h1 };
+        shader.uniforms.uH2     = { value:h2 };
+        shader.uniforms.uGlow   = { value:glow };
+        shader.uniforms.uSpread = { value:spread };
+        shader.vertexShader = shader.vertexShader
+          .replace('#include <common>', `#include <common>
+${GLSL_WV}`)
+          .replace('#include <worldpos_vertex>', `#include <worldpos_vertex>
+${GLSL_WC}`);
+        shader.fragmentShader = shader.fragmentShader
+          .replace('#include <common>', `#include <common>
+uniform float uH1,uH2,uGlow,uSpread;
+${GLSL_WV}
+${GLSL_HSL}`)
+          .replace('#include <dithering_fragment>',
+            `vec3 vd2=normalize(cameraPosition-vWP);float fr2=pow(1.0-abs(dot(vWN,vd2)),uSpread);`+
+            `vec3 nc1=hsl2rgb(uH1,0.9,0.65);vec3 nc2=hsl2rgb(uH2,0.9,0.65);`+
+            `gl_FragColor.rgb+=mix(nc1,nc2,fr2)*fr2*uGlow;
+#include <dithering_fragment>`);
+        mat.userData.shader = shader;
+      };
+      return mat;
+    }
+    case 'gradient': {
+      const c1 = gp('gradient','color1',263)/360, c2 = gp('gradient','color2',187)/360;
+      const sat = gp('gradient','sat',75)/100, lit = gp('gradient','lit',60)/100;
+      const mat = new THREE.MeshPhysicalMaterial({ color:0xffffff, metalness:0.1, roughness:0.2, clearcoat:0.8, envMapIntensity:1.0 });
+      mat.onBeforeCompile = (shader) => {
+        shader.uniforms.uGH1 = { value:c1 }; shader.uniforms.uGH2 = { value:c2 };
+        shader.uniforms.uSat = { value:sat }; shader.uniforms.uLit = { value:lit };
+        shader.vertexShader = shader.vertexShader
+          .replace('#include <common>', `#include <common>\nvarying vec3 vOPos;`)
+          .replace('#include <begin_vertex>', `#include <begin_vertex>\nvOPos = position;`);
+        shader.fragmentShader = shader.fragmentShader
+          .replace('#include <common>',
+            `#include <common>
+uniform float uGH1,uGH2,uSat,uLit;
+varying vec3 vOPos;
+${GLSL_HSL}`)
+          .replace('vec4 diffuseColor = vec4( diffuse, opacity );',
+            `float gT=clamp(vOPos.y*0.5+0.5,0.0,1.0);`+
+            `vec3 gc1=hsl2rgb(uGH1,uSat,uLit);vec3 gc2=hsl2rgb(uGH2,uSat,uLit);`+
+            `vec4 diffuseColor=vec4(mix(gc1,gc2,gT),opacity);`);
+        mat.userData.shader = shader;
+      };
+      return mat;
+    }
+    default: return buildPresetMaterial('solid');
+  }
+}
+
+function buildPresetSliders(presetId) {
+  const container = document.getElementById('presetParams');
+  container.innerHTML = '';
+  const sliders = PRESET_SLIDERS[presetId];
+  if (!sliders) return;
+  for (const s of sliders) {
+    const val = gp(presetId, s.key, s.def);
+    const row = document.createElement('div');
+    row.className = 'ov-slider-row';
+    row.innerHTML = `<div class="ov-label">${s.label}</div><input type="range" class="${s.rainbow ? 'rainbow-range' : 'param-range'}" min="${s.min}" max="${s.max}" value="${val}">`;
+    const input = row.querySelector('input');
+    input.addEventListener('input', () => {
+      const v = parseFloat(input.value);
+      presetParams[`${presetId}-${s.key}`] = v;
+      if (activePresetMat) s.apply(v, activePresetMat);
+      if (['color','hue','tint','color1'].includes(s.key)) syncPresetAccent(presetId);
+    });
+    container.appendChild(row);
+  }
+}
+
+function hslAccent(h, s, l) {
+  const c = new THREE.Color().setHSL(h / 360, s, l);
+  const hex = '#' + c.getHexString();
+  const d = new THREE.Color().setHSL(h / 360, s, l * 0.72);
+  return { hex, dim: '#' + d.getHexString() };
+}
+
+function syncPresetAccent(id) {
+  let col = null;
+  if (id === 'solid')         col = hslAccent(gp('solid','color',230), 0.75, 0.60);
+  else if (id === 'clay')     col = hslAccent(gp('clay','color',25),   0.55, 0.55);
+  else if (id === 'neon')     col = hslAccent(gp('neon','hue',270),    0.90, 0.65);
+  else if (id === 'gradient') col = hslAccent(gp('gradient','color1',263), 0.75, 0.62);
+  else if (id === 'glass' && gp('glass','tint',0) > 5)
+                               col = hslAccent(gp('glass','tint',0),   0.55, 0.68);
+  else if (id === 'chrome' && gp('chrome','tint',0) > 5)
+                               col = hslAccent(gp('chrome','tint',0),  0.45, 0.72);
+  const root = document.documentElement;
+  if (col) {
+    root.style.setProperty('--accent', col.hex);
+    root.style.setProperty('--accent-dim', col.dim);
+  } else if (id !== 'holographic') {
+    root.style.setProperty('--accent', currentAccent.hex);
+    root.style.setProperty('--accent-dim', currentAccent.dim);
+  }
+  document.querySelectorAll('.swatch').forEach(s =>
+    s.classList.toggle('active', col ? false : s.dataset.name === currentAccent.name)
+  );
+}
+
+function applyPreset(id) {
+  currentPresetId = id;
+  buildPresetSliders(id);
+  syncPresetAccent(id);
+  scheduleRebuild(0);
+}
+
+let matDefault = null;
+let matHighlight = null;
+let matOverlay = null;
+
+function buildActiveMaterials() {
+  if (matDefault)   { matDefault.dispose();   matDefault = null; }
+  if (matHighlight) { matHighlight.dispose(); matHighlight = null; }
+  if (matOverlay)   { matOverlay.dispose();   matOverlay = null; }
+  activePresetMat = null;
+
+  if (viewMode === 'wireframe') {
+    matDefault   = new THREE.MeshBasicMaterial({ color: 0x8B5CF6, wireframe: true, opacity: 0.8, transparent: true });
+    matHighlight = new THREE.MeshBasicMaterial({ color: currentAccent.three, wireframe: true, opacity: 0.9, transparent: true });
+    matOverlay   = null;
+  } else if (viewMode === 'ghosted') {
+    matDefault   = new THREE.MeshStandardMaterial({ color: 0xd0d4e8, transparent: true, opacity: 0.12, depthWrite: false });
+    matHighlight = new THREE.MeshStandardMaterial({ color: currentAccent.three, transparent: true, opacity: 0.2, depthWrite: false });
+    matOverlay   = new THREE.MeshBasicMaterial({ color: 0x8B5CF6, wireframe: true, opacity: 0.1, transparent: true });
+  } else if (viewMode === 'shaded') {
+    matDefault   = new THREE.MeshStandardMaterial({ color: isDarkMode ? 0xcccccc : 0x999999, roughness: 1.0, metalness: 0.0 });
+    matHighlight = new THREE.MeshStandardMaterial({ color: currentAccent.three, emissive: currentAccent.three, emissiveIntensity: 0.35, roughness: 1.0, metalness: 0.0 });
+    matOverlay   = null;
+  } else { // rendered
+    matDefault = buildPresetMaterial(currentPresetId);
+    activePresetMat = matDefault;
+    matHighlight = new THREE.MeshPhysicalMaterial({ color: currentAccent.three, emissive: currentAccent.three, emissiveIntensity: 0.35, metalness: 0.08, roughness: 0.18, clearcoat: 0.9, clearcoatRoughness: 0.1 });
+    matOverlay   = null;
+  }
 }
 
 // ─── QR Generation ───
@@ -789,7 +1337,7 @@ function buildWall(positions, normals, center, u, v, n, param1, param2, param3, 
 }
 
 // ─── Edge Treatment (Chamfer / Fillet) ───
-function buildEdgeTreatment(size, C, mode) {
+function buildEdgeTreatment(size, C, mode, faceQRData) {
   if (C <= 0 || mode === 'none') return null;
   const positions = [];
   const normals = [];
@@ -807,29 +1355,38 @@ function buildEdgeTreatment(size, C, mode) {
     const n1 = new THREE.Vector3(...FACE_TABLE[fi].normal);
     const n2 = new THREE.Vector3(...FACE_TABLE[fj].normal);
     const edgeDir = new THREE.Vector3().crossVectors(n1, n2).normalize();
+    const N = Math.max(faceQRData[fi] || 21, faceQRData[fj] || 21);
 
     if (mode === 'chamfer') {
-      const a = n1.clone().multiplyScalar(half).add(n2.clone().multiplyScalar(edgeHalf)).add(edgeDir.clone().multiplyScalar(-edgeHalf));
-      const b = n1.clone().multiplyScalar(half).add(n2.clone().multiplyScalar(edgeHalf)).add(edgeDir.clone().multiplyScalar(edgeHalf));
-      const c = n1.clone().multiplyScalar(edgeHalf).add(n2.clone().multiplyScalar(half)).add(edgeDir.clone().multiplyScalar(edgeHalf));
-      const d = n1.clone().multiplyScalar(edgeHalf).add(n2.clone().multiplyScalar(half)).add(edgeDir.clone().multiplyScalar(-edgeHalf));
-      const norm = n1.clone().add(n2).normalize();
-      pushQuad(positions, normals, a, b, c, d, norm);
+      for (let k = 0; k < N; k++) {
+        const tA = (k / N - 0.5) * 2 * edgeHalf;
+        const tB = ((k + 1) / N - 0.5) * 2 * edgeHalf;
+        const a = n1.clone().multiplyScalar(half).add(n2.clone().multiplyScalar(edgeHalf)).add(edgeDir.clone().multiplyScalar(tA));
+        const b = n1.clone().multiplyScalar(half).add(n2.clone().multiplyScalar(edgeHalf)).add(edgeDir.clone().multiplyScalar(tB));
+        const c = n1.clone().multiplyScalar(edgeHalf).add(n2.clone().multiplyScalar(half)).add(edgeDir.clone().multiplyScalar(tB));
+        const d = n1.clone().multiplyScalar(edgeHalf).add(n2.clone().multiplyScalar(half)).add(edgeDir.clone().multiplyScalar(tA));
+        const norm = n1.clone().add(n2).normalize();
+        pushQuad(positions, normals, a, b, c, d, norm);
+      }
     } else if (mode === 'fillet') {
       const segments = 8;
       const centerLine = n1.clone().multiplyScalar(half - C).add(n2.clone().multiplyScalar(half - C));
-      for (let s = 0; s < segments; s++) {
-        const t0 = (s / segments) * Math.PI / 2;
-        const t1 = ((s + 1) / segments) * Math.PI / 2;
-        const r0 = centerLine.clone().add(n1.clone().multiplyScalar(C * Math.cos(t0))).add(n2.clone().multiplyScalar(C * Math.sin(t0)));
-        const r1 = centerLine.clone().add(n1.clone().multiplyScalar(C * Math.cos(t1))).add(n2.clone().multiplyScalar(C * Math.sin(t1)));
-        const a = r0.clone().add(edgeDir.clone().multiplyScalar(-edgeHalf));
-        const b = r0.clone().add(edgeDir.clone().multiplyScalar(edgeHalf));
-        const c = r1.clone().add(edgeDir.clone().multiplyScalar(edgeHalf));
-        const d = r1.clone().add(edgeDir.clone().multiplyScalar(-edgeHalf));
-        const mt = (t0 + t1) / 2;
-        const norm = n1.clone().multiplyScalar(Math.cos(mt)).add(n2.clone().multiplyScalar(Math.sin(mt))).normalize();
-        pushQuad(positions, normals, a, b, c, d, norm);
+      for (let k = 0; k < N; k++) {
+        const tA = (k / N - 0.5) * 2 * edgeHalf;
+        const tB = ((k + 1) / N - 0.5) * 2 * edgeHalf;
+        for (let s = 0; s < segments; s++) {
+          const t0 = (s / segments) * Math.PI / 2;
+          const t1 = ((s + 1) / segments) * Math.PI / 2;
+          const r0 = centerLine.clone().add(n1.clone().multiplyScalar(C * Math.cos(t0))).add(n2.clone().multiplyScalar(C * Math.sin(t0)));
+          const r1 = centerLine.clone().add(n1.clone().multiplyScalar(C * Math.cos(t1))).add(n2.clone().multiplyScalar(C * Math.sin(t1)));
+          const a = r0.clone().add(edgeDir.clone().multiplyScalar(tA));
+          const b = r0.clone().add(edgeDir.clone().multiplyScalar(tB));
+          const c = r1.clone().add(edgeDir.clone().multiplyScalar(tB));
+          const d = r1.clone().add(edgeDir.clone().multiplyScalar(tA));
+          const mt = (t0 + t1) / 2;
+          const norm = n1.clone().multiplyScalar(Math.cos(mt)).add(n2.clone().multiplyScalar(Math.sin(mt))).normalize();
+          pushQuad(positions, normals, a, b, c, d, norm);
+        }
       }
     }
   }
@@ -916,19 +1473,41 @@ function flipGeometryNormals(geo) {
 }
 
 // ─── Rebuild ───
+let pendingDispose = [];
+
 function rebuild() {
-  // Clear old meshes
-  while (cubeGroup.children.length) {
-    const m = cubeGroup.children[0];
-    cubeGroup.remove(m);
-    m.geometry.dispose();
+  // Dispose geometries from previous rebuild
+  for (const g of pendingDispose) g.dispose();
+  pendingDispose = [];
+
+  // Collect unique geometries from current scene children before clearing
+  const geosSeen = new Set();
+  for (const child of cubeGroup.children) {
+    if (child.geometry && !geosSeen.has(child.geometry)) {
+      geosSeen.add(child.geometry);
+      pendingDispose.push(child.geometry);
+    }
   }
+
+  // Clear old meshes (geometries already queued for next-rebuild disposal)
+  while (cubeGroup.children.length) cubeGroup.remove(cubeGroup.children[0]);
   faceMeshes = [];
+
+  buildActiveMaterials();
+  const shadowsOn = VIEW_MODES[viewMode].shadows;
+
+  // Keep grid flush against cube bottom
+  GROUND_Y = -(cubeSize / 2) - 0.05;
+  gridMesh.position.y = GROUND_Y;
 
   const faceURLs = distributeURLs();
   const warnings = [];
+  if (cubeSize < 32) {
+    warnings.push({ face: 'All', msg: 'Cube under 32mm — may be too small for most printers.' });
+  }
   let hasAnyQR = false;
   let totalTris = 0;
+  const faceQRResults = []; // totalModules per face (or null)
 
   for (let i = 0; i < 6; i++) {
     const url = faceURLs[i];
@@ -939,9 +1518,11 @@ function rebuild() {
       if (qrData && qrData.error) {
         warnings.push({ face: FACE_TABLE[i].name, msg: qrData.error });
         qrData = null;
+        faceQRResults.push(null);
       } else if (qrData) {
         hasAnyQR = true;
         const totalMods = qrData.count + 8;
+        faceQRResults.push(totalMods);
         const effectiveSize = edgeMode !== 'none' ? cubeSize - 2 * edgeSize : cubeSize;
         const pitch = effectiveSize / totalMods;
         if (pitch < 1.0) {
@@ -950,28 +1531,48 @@ function rebuild() {
             msg: `Module pitch ${pitch.toFixed(2)}mm — may be too small to print. Use a shorter URL or larger cube.`
           });
         }
+      } else {
+        faceQRResults.push(null);
       }
+    } else {
+      faceQRResults.push(null);
     }
 
     const inset = edgeMode !== 'none' ? edgeSize : 0;
     const geo = buildFaceGeometry(i, qrData, cubeSize, engraveDepth, inset);
     if (normalsFlipped) flipGeometryNormals(geo);
-    const mesh = new THREE.Mesh(geo, defaultMaterial);
+    const mesh = new THREE.Mesh(geo, matDefault);
+    mesh.castShadow = shadowsOn;
+    mesh.receiveShadow = shadowsOn;
     mesh.userData.faceIndex = i;
     cubeGroup.add(mesh);
     faceMeshes.push(mesh);
     totalTris += geo.attributes.position.count / 3;
+
+    if (matOverlay) {
+      const overlay = new THREE.Mesh(geo, matOverlay);
+      overlay.userData.faceIndex = -2;
+      cubeGroup.add(overlay);
+    }
   }
 
   // Edge treatment geometry
   if (edgeMode !== 'none' && edgeSize > 0) {
-    const edgeGeo = buildEdgeTreatment(cubeSize, edgeSize, edgeMode);
+    const edgeGeo = buildEdgeTreatment(cubeSize, edgeSize, edgeMode, faceQRResults);
     if (edgeGeo) {
       if (normalsFlipped) flipGeometryNormals(edgeGeo);
-      const edgeMesh = new THREE.Mesh(edgeGeo, defaultMaterial);
+      const edgeMesh = new THREE.Mesh(edgeGeo, matDefault);
+      edgeMesh.castShadow = shadowsOn;
+      edgeMesh.receiveShadow = shadowsOn;
       edgeMesh.userData.faceIndex = -1;
       cubeGroup.add(edgeMesh);
       totalTris += edgeGeo.attributes.position.count / 3;
+
+      if (matOverlay) {
+        const edgeOverlay = new THREE.Mesh(edgeGeo, matOverlay);
+        edgeOverlay.userData.faceIndex = -2;
+        cubeGroup.add(edgeOverlay);
+      }
     }
   }
 
@@ -1011,12 +1612,12 @@ function scheduleRebuild(delay = 0) {
 // ─── Face Highlight ───
 function applyHighlight() {
   for (let i = 0; i < faceMeshes.length; i++) {
-    faceMeshes[i].material = defaultMaterial;
+    faceMeshes[i].material = matDefault;
   }
   if (focusedInputIndex >= 0) {
     const faces = getFacesForInput(focusedInputIndex);
     for (const f of faces) {
-      if (faceMeshes[f]) faceMeshes[f].material = highlightMaterial;
+      if (faceMeshes[f]) faceMeshes[f].material = matHighlight;
     }
   }
   // Also light up face tags
@@ -1047,36 +1648,29 @@ function updateFaceTags() {
 
 // ─── Theme System ───
 function applyTheme() {
-  const root = document.documentElement;
-  root.style.setProperty('--accent', currentAccent.hex);
-  root.style.setProperty('--accent-dim', currentAccent.dim);
-
   document.body.classList.toggle('light', !isDarkMode);
 
   // Scene
   const sceneBg = isDarkMode ? 0x0a0a0a : 0xe0e0e0;
   scene.background = new THREE.Color(sceneBg);
 
+  // Floating shapes
+  floatingMat.opacity = isDarkMode ? 0.06 : 0.04;
+  floatingMat.color.set(currentAccent.three);
+
   // Grid
-  if (isDarkMode) {
-    gridHelper.material.color.setHex(0x1a1a1a);
-    gridHelper.material.opacity = 1;
-  } else {
-    gridHelper.material.color.setHex(0xcccccc);
-    gridHelper.material.opacity = 1;
-  }
+  updateGridColor();
+  rebuildGrid();
 
-  updateMaterials();
-
-  // Popover swatch active states
-  document.querySelectorAll('.swatch').forEach(s => {
-    s.classList.toggle('active', s.dataset.name === currentAccent.name);
-  });
+  scheduleRebuild(0);
 
   // Mode toggle text
   document.getElementById('modeToggle').textContent = isDarkMode ? 'Switch to Light' : 'Switch to Dark';
 
   saveTheme();
+
+  // Accent — let syncPresetAccent decide (falls back to currentAccent when preset has no opinion)
+  syncPresetAccent(currentPresetId);
 }
 
 // ─── UI Setup ───
@@ -1116,9 +1710,13 @@ for (let i = 0; i < 6; i++) {
     applyHighlight();
   });
 
+  const wrap = document.createElement('div');
+  wrap.className = 'url-input-wrap';
+  wrap.appendChild(input);
+  wrap.appendChild(tag);
+
   row.appendChild(label);
-  row.appendChild(input);
-  row.appendChild(tag);
+  row.appendChild(wrap);
   urlGroup.appendChild(row);
   urlInputs.push(input);
 }
@@ -1196,10 +1794,12 @@ document.getElementById('exportBtn').addEventListener('click', () => {
     geos.push(child.geometry);
   }
   const merged = BufferGeometryUtils.mergeGeometries(geos, false);
-  const tmpMesh = new THREE.Mesh(merged, defaultMaterial);
+  const watertight = BufferGeometryUtils.mergeVertices(merged, 0.001);
+  merged.dispose();
+  const tmpMesh = new THREE.Mesh(watertight, matDefault);
   const exporter = new STLExporter();
   const result = exporter.parse(tmpMesh, { binary: true });
-  merged.dispose();
+  watertight.dispose();
   const blob = new Blob([result], { type: 'application/octet-stream' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
@@ -1245,8 +1845,69 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ── Material Presets ──
+const matPresetGrid = document.getElementById('matPresetGrid');
+PRESETS.forEach(preset => {
+  const btn = document.createElement('button');
+  btn.className = 'mat-preset-btn' + (preset.id === currentPresetId ? ' active' : '');
+  const swatch = document.createElement('div');
+  swatch.className = 'mat-swatch';
+  swatch.style.cssText = preset.swatch;
+  const label = document.createElement('div');
+  label.className = 'mat-name';
+  label.textContent = preset.name;
+  btn.appendChild(swatch);
+  btn.appendChild(label);
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mat-preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyPreset(preset.id);
+  });
+  matPresetGrid.appendChild(btn);
+});
+buildPresetSliders(currentPresetId);
+
+// ── Grid Controls ──
+document.getElementById('gridVisibleChk').addEventListener('change', e => {
+  gridVisible = e.target.checked;
+  gridMesh.visible = gridVisible;
+});
+document.getElementById('gridColorSlider').addEventListener('input', e => {
+  gridColorVal = parseInt(e.target.value);
+  updateGridColor();
+});
+document.getElementById('gridCellSizeSlider').addEventListener('input', e => {
+  gridCellSize = parseFloat(e.target.value);
+  rebuildGrid();
+});
+document.getElementById('gridExtentsSlider').addEventListener('input', e => {
+  gridExtents = parseInt(e.target.value);
+  rebuildGrid();
+});
+document.getElementById('gridFalloffSlider').addEventListener('input', e => {
+  gridFalloff = parseInt(e.target.value) / 100;
+  rebuildGrid();
+});
+
+// ── Theme Icon Button ──
+document.getElementById('themeIconBtn').addEventListener('click', () => {
+  isDarkMode = !isDarkMode;
+  applyTheme();
+});
+
+// View mode
+document.querySelectorAll('#viewModeControl .segment-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#viewModeControl .segment-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    viewMode = btn.dataset.mode;
+    scheduleRebuild(0);
+  });
+});
+
 // Init
 edgeSlider.max = Math.round(cubeSize * 0.15 * 10) / 10;
+updateGridColor();
 applyTheme();
 rebuild();
 </script>

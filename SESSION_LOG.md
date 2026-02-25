@@ -4,6 +4,40 @@ This file tracks session handoffs so the next Claude Code instance can quickly g
 
 ---
 
+## Session — 2026-02-24 00:00
+
+### Goal
+Polish pass on `index.html` (~1840 lines): 5 improvements planned in advance via plan mode.
+
+### Accomplished
+- **Grid visibility fix** — `updateGridColor()` now uses clean inversion: `gridColorVal/255` in dark, `1 - gridColorVal/255` in light. Grid extents slider max → 500 (step 5, default 100). Cell size default → 5. Grid is now actually visible in both modes.
+- **View mode buttons vertical layout** — replaced `.segment-control` horizontal row with a flex-column div. Buttons show full labels (`Wireframe`, `Ghosted`, `Shaded`, `Rendered`) with left-aligned text; no more overflow.
+- **Ambient floating geometry** — 22 wireframe shapes (IcosahedronGeometry, OctahedronGeometry, TetrahedronGeometry, TorusGeometry, DodecahedronGeometry) placed on sphere r=180–360. Slowly rotate per-frame via `userData.rv`. Color tracks accent; opacity 0.06 dark / 0.04 light. Added via `floatingGroup` + `floatingShapes[]`.
+- **Slider range expansion** — Size: min 20 → max 200, default 44mm. Depth: min 0.1 → max 5.0. "Too small" warning fires in `rebuild()` when `cubeSize < 32`.
+- **Preset-driven accent color** — Added `hslAccent(h,s,l)` helper and `syncPresetAccent(id)`. Solid/clay/neon/gradient/glass(tinted)/chrome(tinted) push their hue into `--accent`/`--accent-dim` CSS vars. Holographic cycles rainbow in `animate()` at 0.4°/frame via `holoHue`. `applyTheme()` delegates to `syncPresetAccent` instead of hardcoding. Color-related preset sliders call `syncPresetAccent` live.
+
+### In Progress / Incomplete
+- Nothing — all 5 planned changes implemented and complete.
+
+### Key Decisions
+- `hslAccent` and `syncPresetAccent` defined via `function` keyword → hoisted, safe to call from `animate()` which is defined earlier in file.
+- `applyTheme()` no longer manually sets `--accent`; all accent logic flows through `syncPresetAccent` which falls back to `currentAccent` when preset has no color opinion.
+- Floating shapes share a single `floatingMat` (wireframe, transparent) — color updated via `floatingMat.color.set(currentAccent.three)` in `applyTheme`.
+
+### Files Changed
+- `/Users/brianharms/Desktop/Claude Projects/qr-cube/index.html` — sole file modified
+
+### Known Issues
+- None identified.
+
+### Running Services
+- None.
+
+### Next Steps
+- User reviews visual output and critiques. Likely feedback areas: floating shape density/opacity, grid default extents (100 may still feel sparse), accent color saturation levels per preset.
+
+---
+
 ## Session — 2026-02-21 14:24
 
 ### Goal
