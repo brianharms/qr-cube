@@ -4,6 +4,43 @@ This file tracks session handoffs so the next Claude Code instance can quickly g
 
 ---
 
+## Session — 2026-03-10 18:17
+
+### Goal
+Fix non-manifold edges in STL export (specifically with chamfer/fillet edge treatment) and deploy the app publicly.
+
+### Accomplished
+- **Non-manifold edge fix** — Implemented uniform subdivision across all faces and edge treatment geometry. Root cause: `buildEdgeTreatment` used per-edge `N = max(faceQRData[fi], faceQRData[fj])` which didn't match adjacent face vertex counts, creating T-junctions. Fix: two-pass `rebuild()` — first pass computes all QR data and finds `maxQRCount`, second pass builds all geometry with `uniformTotal = maxQRCount + 8`. `buildFaceGeometry` now accepts `uniformTotal` param and centers QR grid via dynamic `quietZone = floor((uniformTotal - count) / 2)`. `buildBlankFace` now subdivides into NxN grid instead of single quad. `buildEdgeTreatment` accepts single `uniformN` instead of per-face array.
+- **GitHub Pages deployment** — Made repo public, enabled GitHub Pages, app is live at `https://brianharms.github.io/qr-cube/`
+- **README simplified** — Replaced detailed technical README with short prototype-status description
+- **New skills created** — `/hypothesize` (3 parallel agents diagnose bugs) and `/propose` (3 parallel agents propose design approaches) added to `~/.claude/skills/`
+
+### In Progress / Incomplete
+- Nothing — all work completed.
+
+### Key Decisions
+- Uniform subdivision ensures all shared edges (face↔face, face↔edge-treatment) have identical vertex counts and positions, eliminating T-junctions at boundaries
+- `uniformTotal` defaults to 29 (21 + 8) when no QR data present
+- Chose GitHub Pages over Cloudflare/custom domain for simplicity — user's `ritual.industries` is on Figma Sites so path-based routing wasn't feasible without DNS changes
+
+### Files Changed
+- `index.html` — non-manifold fix in `buildFaceGeometry`, `buildBlankFace`, `buildEdgeTreatment`, `rebuild()`
+- `README.md` — simplified to prototype disclaimer
+- `~/.claude/skills/hypothesize/SKILL.md` — new skill
+- `~/.claude/skills/propose/SKILL.md` — new skill
+
+### Known Issues
+- None identified.
+
+### Running Services
+- None.
+
+### Next Steps
+- User may want to test STL export with chamfer/fillet in their slicer to confirm non-manifold edges are resolved
+- If user wants `ritual.industries/qr` routing, would need to move DNS to Cloudflare for path-based redirects or use `qr.ritual.industries` subdomain
+
+---
+
 ## Session — 2026-02-24 00:00
 
 ### Goal
