@@ -1159,7 +1159,7 @@ const FACE_TABLE = [
 ];
 
 // ─── Geometry Engine ───
-function buildFaceGeometry(faceIndex, qrData, size, depth, inset) {
+function buildFaceGeometry(faceIndex, qrData, size, depth, inset, uniformTotal) {
   const face = FACE_TABLE[faceIndex];
   const n = new THREE.Vector3(...face.normal);
   const u = new THREE.Vector3(...face.uAxis);
@@ -1170,12 +1170,12 @@ function buildFaceGeometry(faceIndex, qrData, size, depth, inset) {
   const innerSize = innerHalf * 2;
 
   if (!qrData || qrData.error) {
-    return buildBlankFace(center, u, v, n, innerSize);
+    return buildBlankFace(center, u, v, n, innerSize, uniformTotal);
   }
 
   const { grid, count } = qrData;
-  const quietZone = 4;
-  const totalModules = count + quietZone * 2;
+  const totalModules = uniformTotal || (count + 8);
+  const quietZone = Math.floor((totalModules - count) / 2);
 
   const positions = [];
   const normals = [];
@@ -1281,17 +1281,23 @@ function buildFaceGeometry(faceIndex, qrData, size, depth, inset) {
   return geo;
 }
 
-function buildBlankFace(center, u, v, n, size) {
-  const half = size / 2;
-  const p00 = center.clone().add(u.clone().multiplyScalar(-half)).add(v.clone().multiplyScalar(-half));
-  const p10 = center.clone().add(u.clone().multiplyScalar(half)).add(v.clone().multiplyScalar(-half));
-  const p11 = center.clone().add(u.clone().multiplyScalar(half)).add(v.clone().multiplyScalar(half));
-  const p01 = center.clone().add(u.clone().multiplyScalar(-half)).add(v.clone().multiplyScalar(half));
-
+function buildBlankFace(center, u, v, n, size, subdivisions) {
   const positions = [];
   const normals = [];
-  pushQuad(positions, normals, p00, p10, p11, p01, n);
-
+  const N = subdivisions || 1;
+  for (let row = 0; row < N; row++) {
+    for (let col = 0; col < N; col++) {
+      const u0 = (col / N - 0.5) * size;
+      const u1 = ((col + 1) / N - 0.5) * size;
+      const v0 = (0.5 - row / N) * size;
+      const v1 = (0.5 - (row + 1) / N) * size;
+      const p00 = center.clone().add(u.clone().multiplyScalar(u0)).add(v.clone().multiplyScalar(v0));
+      const p10 = center.clone().add(u.clone().multiplyScalar(u1)).add(v.clone().multiplyScalar(v0));
+      const p11 = center.clone().add(u.clone().multiplyScalar(u1)).add(v.clone().multiplyScalar(v1));
+      const p01 = center.clone().add(u.clone().multiplyScalar(u0)).add(v.clone().multiplyScalar(v1));
+      pushQuad(positions, normals, p00, p10, p11, p01, n);
+    }
+  }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
@@ -1337,7 +1343,7 @@ function buildWall(positions, normals, center, u, v, n, param1, param2, param3, 
 }
 
 // ─── Edge Treatment (Chamfer / Fillet) ───
-function buildEdgeTreatment(size, C, mode, faceQRData) {
+function buildEdgeTreatment(size, C, mode, uniformN) {
   if (C <= 0 || mode === 'none') return null;
   const positions = [];
   const normals = [];
@@ -1355,7 +1361,7 @@ function buildEdgeTreatment(size, C, mode, faceQRData) {
     const n1 = new THREE.Vector3(...FACE_TABLE[fi].normal);
     const n2 = new THREE.Vector3(...FACE_TABLE[fj].normal);
     const edgeDir = new THREE.Vector3().crossVectors(n1, n2).normalize();
-    const N = Math.max(faceQRData[fi] || 21, faceQRData[fj] || 21);
+    const N = uniformN;
 
     if (mode === 'chamfer') {
       for (let k = 0; k < N; k++) {
@@ -1507,39 +1513,40 @@ function rebuild() {
   }
   let hasAnyQR = false;
   let totalTris = 0;
-  const faceQRResults = []; // totalModules per face (or null)
 
+  // Pass 1: generate QR data and compute uniform subdivision count
+  const faceQRData = [];
+  let maxQRCount = 0;
   for (let i = 0; i < 6; i++) {
     const url = faceURLs[i];
     let qrData = null;
-
     if (url) {
       qrData = getQRModules(url);
       if (qrData && qrData.error) {
         warnings.push({ face: FACE_TABLE[i].name, msg: qrData.error });
         qrData = null;
-        faceQRResults.push(null);
       } else if (qrData) {
         hasAnyQR = true;
-        const totalMods = qrData.count + 8;
-        faceQRResults.push(totalMods);
+        if (qrData.count > maxQRCount) maxQRCount = qrData.count;
         const effectiveSize = edgeMode !== 'none' ? cubeSize - 2 * edgeSize : cubeSize;
-        const pitch = effectiveSize / totalMods;
+        const pitch = effectiveSize / (qrData.count + 8);
         if (pitch < 1.0) {
           warnings.push({
             face: FACE_TABLE[i].name,
             msg: `Module pitch ${pitch.toFixed(2)}mm — may be too small to print. Use a shorter URL or larger cube.`
           });
         }
-      } else {
-        faceQRResults.push(null);
       }
-    } else {
-      faceQRResults.push(null);
     }
+    faceQRData.push(qrData);
+  }
+  const uniformTotal = maxQRCount > 0 ? maxQRCount + 8 : 29;
 
+  // Pass 2: build geometry with uniform subdivision
+  for (let i = 0; i < 6; i++) {
+    const qrData = faceQRData[i];
     const inset = edgeMode !== 'none' ? edgeSize : 0;
-    const geo = buildFaceGeometry(i, qrData, cubeSize, engraveDepth, inset);
+    const geo = buildFaceGeometry(i, qrData, cubeSize, engraveDepth, inset, uniformTotal);
     if (normalsFlipped) flipGeometryNormals(geo);
     const mesh = new THREE.Mesh(geo, matDefault);
     mesh.castShadow = shadowsOn;
@@ -1558,7 +1565,7 @@ function rebuild() {
 
   // Edge treatment geometry
   if (edgeMode !== 'none' && edgeSize > 0) {
-    const edgeGeo = buildEdgeTreatment(cubeSize, edgeSize, edgeMode, faceQRResults);
+    const edgeGeo = buildEdgeTreatment(cubeSize, edgeSize, edgeMode, uniformTotal);
     if (edgeGeo) {
       if (normalsFlipped) flipGeometryNormals(edgeGeo);
       const edgeMesh = new THREE.Mesh(edgeGeo, matDefault);
